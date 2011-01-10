@@ -1,0 +1,4 @@
+# Default settings for cartracker.
+START_DAEMON="true"
+OPTIONS=""
+LOG="/tmp/cartracker.log"

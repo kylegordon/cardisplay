@@ -1,0 +1,15 @@
+If Ignition is on
+If charge light is off
+	Start timer for 5 seconds
+		When timer expires, turn on output
+
+If ignition then goes off
+	Start timer for 300 seconds
+		If ignition comes back on, reset timer
+	Turn off power after 300 seconds
+
+
+---------------------------------
+
+Invert charge light status, pass through two transistors (AND gate)
+

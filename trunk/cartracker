@@ -1,0 +1,457 @@
+#!/usr/bin/python
+# -*- coding: iso-8859-1 -*-
+import sys
+import gps
+import os
+import time
+#import date
+#import datetime
+import dateutil, dateutil.parser
+import commands
+import errno
+import csv
+import select
+import logging
+import pylcd
+
+# Import the Data Acquisition module
+# Must be in the same directory as cartracker
+import daq
+
+# Import the GPX model
+# Must also be in the same directory
+#import gpx
+
+#from datetime import datetime, date, time
+from datetime import datetime, timedelta
+
+# Needed for Tweet function
+from os import popen
+
+LOGFILE = "/tmp/cartracker.log"
+debug = 1
+old_status = 0 # Used to detect a state change of GPS lock
+latsuffix = "?"
+longsuffix = "?"
+date = ''
+switchspeed = 10 # The speed at which to split from a detailed screen to a simple screen
+outputdir = '/tmp/'
+stationary = 0
+twitteruser = "s3rudolph"
+twitterpass = "Cech7oom"
+tweeted = 0
+connected = 0
+
+LEVELS = {'debug': logging.DEBUG,
+          'info': logging.INFO,
+          'warning': logging.WARNING,
+          'error': logging.ERROR,
+          'critical': logging.CRITICAL}
+
+logging.basicConfig(filename=LOGFILE,level=logging.INFO)
+
+logging.info('Starting cartracker')
+logging.debug('Info entry')
+
+model = [
+"""<?xml version="1.0" encoding="UTF-8"?>
+<gpx
+  version="1.1"
+  creator="makegpx"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.topografix.com/GPX/1/1"
+  xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+<metadata>
+    <time>%s</time>
+</metadata>
+  <trk>
+""","""    <trkseg>
+""","""      <trkpt lat="%s" lon="%s"><time>%s</time></trkpt>
+""","""      <trkpt lat="%s" lon="%s"><desc>%s</desc><time>%s</time></trkpt>
+""","""    </trkseg>
+""","""  </trk>
+""","""  <wpt lat="%s" lon="%s">
+    <desc>%s</desc><link href="%s"><text>%s</text></link>
+  </wpt>
+""","""</gpx>
+"""]
+
+def tweet( message, user, password ):
+	logging.info('%s tweeting - %s' % (user, message))
+	time.sleep(1)
+ 
+	url = 'http://twitter.com/statuses/update.xml' 
+	
+	# If connected to the net, updated Twitter
+	curl = 'curl -s -u %s:%s -d status="%s" %s' % (user,password,message,url)
+	if connected: pipe = popen(curl, 'r')
+
+	# If not connected, note it
+	if not connected: logging.info("Not connected. Not tweeting")
+
+def checkignition():
+	# Check the current state of the ignition.
+	# If ignition is off. Drop a shutdown -t +5, save and bail
+	
+	# Call daq.whatever() and check the state of the ignition line, make it boolean, whatever
+	# FIXME
+	chanIgnition = 1	
+	ignition = daq.one(chanIgnition)
+
+def saveandexit():
+        # The save is blocking, so we can save and then drop the shutdown       
+        closeandrename(csvfile)
+        closeandrename(gpxfile)
+	
+	dojourneylog()
+
+	os.system('sync')
+        os.system('shutdown -H +2')
+
+        # Say goodbye, assuming shutdown is non-blocking
+        # FIXME
+        sys.exit(0)
+
+def dojourneylog():
+	# FIXME
+	# Figure out some stats like start time & location, end time & location, distance travelled, average speed, and maybe attach the GPX file.
+	# We could probably work this out by reading the start and end of gpx trace and doing magic
+	print "Creating and emailing journey log"
+
+def createfiles():
+	# Whip up the filename for the current file
+	# We are assuming system time and date is correct. See NTP section of http://gpsd.berlios.de/gpsd.html to ensure moderate accuracy
+	current = datetime.now()
+	basename = current.strftime("%Y%m%d%H%M%S") + '-current'
+	csvoutputfile = outputdir + basename + '.csv' # Create a CSV file
+	gpxoutputfile = outputdir + basename + '.gpx' # Create a GPX file
+
+	# Create and open files in append mode
+	if not os.path.isfile(csvoutputfile):
+		csvfile = open(csvoutputfile, 'a')
+		temp = csvfile.name
+		logging.info("Created : " + csvfile.name)
+
+	if not os.path.isfile(gpxoutputfile):
+		gpxfile = open(gpxoutputfile, 'a')
+		logging.info("Created : " + gpxfile.name)
+
+	# Return the 3 filesnames back to the caller.
+	return csvfile, gpxfile, basename
+
+def closeandrename(file):
+	# Rename the chosen file from and to
+	current = datetime.now()
+	# Take the first part, strip 'current' from it, and append current date and time, and then append extension from original
+	destfilename = os.path.splitext(file.name)[0].rstrip('current') + current.strftime("%Y%m%d%H%M%S") + os.path.splitext(file.name)[1]
+	os.rename(file.name,destfilename)
+	logging.info("Data saved in " + destfilename)
+	file.close()
+
+def kbfunc():
+	i,o,e = select.select([sys.stdin],[],[],0.0001)
+	for s in i:
+		if s == sys.stdin:
+			input = sys.stdin.readline()
+			logging.info("Keyboard input is" + input)
+			saveandexit()
+			return True
+	return False
+
+def process_num(process):
+	# Get the PID of a process
+	return commands.getoutput('pidof %s' % process)
+
+def lcd_clear(screen):
+	# Blank out all the widgets on the requested screen
+	lcd.widget_set(screen,w1,'1 1 ""')
+	lcd.widget_set(screen,w2,'1 2 ""')
+	lcd.widget_set(screen,w3,'1 3 ""')
+	lcd.widget_set(screen,w4,'1 4 ""')
+
+def lcd_make_screen_active(active,background):
+	# Set the requested screen to active (info) and push the other to the background
+	# It's pretty primitive, and doesn't account for more than one background screen
+        lcd.screen_set(active,"-priority info")
+        lcd.screen_set(background,"-priority background")
+
+def printgpsdata():
+	print
+	print 'GPS reading'
+	print '----------------------------------------'
+	print 'status      ' , session.status
+	print 'GPS ID      ' , session.gps_id
+	print 'lat/long    ' , session.fix.latitude , ',' , session.fix.longitude
+	print 'rounded     ' , round(session.fix.latitude,4),',',round(session.fix.longitude,4)
+	print 'time utc    ' , session.utc, session.fix.time
+	print 'altitude    ' , session.fix.altitude
+	print 'eph         ' , session.fix.eph
+	print 'epv         ' , session.fix.epv
+	print 'ept         ' , session.fix.ept
+	print 'speed(m/s)  ' , session.fix.speed
+	print 'speed(mph)  ' , session.fix.speed * 2.237
+	print 'climb       ' , session.fix.climb
+	print
+	print 'Satellites (total of', len(session.satellites) , 'in view)'
+	# Display summary of all satellite data. Makes the display jump about a bit though
+	# for i in session.satellites:
+	#	print '\t', i
+
+
+def appendcsv(latitude, longitude, altitude, speed, date, time):
+	# appendcsv stub. Might become append GPX one day
+	logging.info("Append the CSV file...")
+	writer=csv.writer(csvfile)
+	writer.writerow( (latitude, longitude, altitude, speed, date, time) )
+
+#Create the 3 files
+csvfile,gpxfile,basename = createfiles()
+
+# FIXME
+strCoord = "0000"
+tweet("Starting up at : " + strCoord, twitteruser, twitterpass)
+
+# Start up the LCD
+lcd=pylcd.client()
+logging.info('Connect message:' + lcd.connect())
+logging.info('Info as know by the module:')
+lcd.getinfo()
+#print 'Setting some info to the display.'
+
+#(sysname, nodename, release, version, machine)=os.uname()
+
+#Define some screens
+Main='main'
+Screen2='Screen2'
+
+#Define some widgets
+w1='w1'
+w2='w2'
+w3='w3'
+w4='w4'
+
+w1str='Empty line 1'
+w2str='Empty line 2'
+w3str='Empty line 3'
+w4str='Empty line 4'
+
+#Set up the first screen
+lcd.screen_add(Main)
+lcd.screen_set(Main,"-heartbeat off")
+lcd.screen_set(Main,"-priority info")
+logging.info("Giving Main priority info")
+lcd.widget_add(Main,w1,'string')
+lcd.widget_add(Main,w2,'string')
+lcd.widget_add(Main,w3,'string')
+lcd.widget_add(Main,w4,'string')
+
+lcd.widget_set(Main,w1,'1 1 "Starting up"')
+
+#Set up the second screen
+lcd.screen_add(Screen2)
+lcd.screen_set(Screen2,"-heartbeat off")
+lcd.screen_set(Screen2,"-priority background")
+logging.info("Giving Screen2 priority background")
+lcd.widget_add(Screen2,w1,'num')
+lcd.widget_add(Screen2,w2,'num')
+lcd.widget_add(Screen2,w3,'num')
+lcd.widget_set(Screen2,w1,'1 "0"')
+lcd.widget_set(Screen2,w2,'6 "0"')
+
+#Test for some prerequisites.
+w1str = "===================="
+w4str = "===================="
+
+#Test for GPSD running and prepare some status messages
+gpsdpid = process_num('/usr/sbin/gpsd')
+if gpsdpid:
+	w2str = "GPSD running: " + gpsdpid
+else:
+	w2str = "GPSD is not running."
+	print "No GPSD running. Exiting in 20 seconds"
+
+#Test for data acquisition module
+if daq.ping():
+	w3str = "DACQ is present"
+	daq = 1
+else:
+	w3str = "DACQ not present"
+	daq = 0
+
+#Display the loading info
+lcd.widget_set(Main,w1,'1 1 "' + w1str + '"')
+lcd.widget_set(Main,w2,'1 2 "' + w2str + '"')
+lcd.widget_set(Main,w3,'1 3 "' + w3str + '"')
+lcd.widget_set(Main,w4,'1 4 "' + w4str + '"')
+
+# Quit if gpsd is not running
+if not gpsdpid or not daq:
+	# This is a 20 second countdown before complete exit. It counts up due to this bug.
+	# Live with this until http://bugs.python.org/issue7298 comes downstream
+	w1str = ''
+	w4str = ''
+	for i in range(20): # 20 chars wide...
+		w1str += '=' # Increment one of the = symbols
+		w4str = w1str # Make bottom row the same as top row
+		lcd.widget_set(Main,w1,'1 1 "' + w1str + '"')
+                lcd.widget_set(Main,w4,'1 4 "' + w4str + '"')
+		time.sleep(1)
+	#sys.exit()
+else:
+	# Give a short status display before proceeding
+	time.sleep(5)
+	
+lcd_clear("main") #Clear the LCD display
+# Empty the string vars
+w1str = ''
+w2str = ''
+w3str = ''
+w4str = ''
+
+#Start the GPS session last. This way we can spit out errors to the LCD screen first
+session = gps.gps()
+
+stopstate = 0
+global ignition
+ignition = 0
+
+while 1:
+    
+    # Check the ignition state
+    # Although it was set to 0 above, it should now be true as this system only starts when the engine is running
+    ignition = checkignition()
+    print "Ignition is " + str(ignition)
+
+    #Since using the logging module, this is no longer relevant
+    #if debug: os.system('clear')
+    session.query('admosyi')
+    # a = altitude, d = date/time, m=mode,
+    # o=postion/fix, s=status, y=satellites
+    # see man -s gpsd
+   
+    # Since using the logging module, some other method will be required to dump GPS info to console...
+    # if debug: printgpsdata()
+
+    mphspeed = session.fix.speed * 2.237
+
+    d2 = dateutil.parser.parse(session.utc)
+    datestr = str(d2.year) + '/' + str(d2.month).rjust(2,"0") + '/' + str(d2.day).rjust(2,"0")
+    timestr = str(d2.hour).rjust(2,"0") + ':' + str(d2.minute).rjust(2,"0") + ':' + str(d2.second).rjust(2,"0")
+
+    ##print time.strftime("%a",session.utc)
+
+    #d3 = d2.astimezone(dateutil.tz.tzutc())
+
+    if session.fix.latitude > 0:
+	latsuffix = "N"
+    elif session.fix.latitude < 0:
+	latsuffix = "S"
+
+    if session.fix.longitude > 0:
+	longsuffix = "E"
+    elif session.fix.longitude < 0:
+	longsuffix = "W"
+
+    # Make up some strings with Latitude and Longitude, since we'll be using it quite often
+    strLatitude = str(round(session.fix.latitude,4)) + latsuffix
+    strLongitude = str(round(session.fix.longitude,4)) + longsuffix
+    strCoord = strLatitude +", " + strLongitude
+
+    if old_status != session.status:
+	logging.info("State change!")
+    else:
+	logging.debug("No state change...")
+    old_status = session.status
+   
+    if ignition == 0:
+    	ignitionofftime = datetime.now()
+	ignitiontimedelta = datetime.now() - ignitionofftime # How long has the ignition been off for?
+    	if ignitiontimedelta >= timedelta(minutes=2):
+    		# Vehicle has turned off for more than two minutes
+		print "Shutting down"
+		saveandexit()
+    elif ignition == 1:
+    	ignitiontimedelta = 0
+    
+    if mphspeed < 1:
+    	if stopstate == 0:
+		# Start timer for 2 minutes and then make stationary=1
+		logging.info("Vehicle has just stopped")
+		tweet("Just stopped at " + strCoord, twitteruser, twitterpass)
+		stopstate = 1
+		stoptime = datetime.now()
+	elif stopstate == 1:
+		stoptimedelta = datetime.now() - stoptime # Figure out how long we've been stopped for
+		logging.info("Stopped for - " + stoptimedelta)
+		if stoptimedelta >= timedelta(minutes=2): 
+			logging.info("Vehicle has stopped for over 2 minutes")
+			if tweeted == 0:
+				tweeted = 1
+				tweet("Sitting for over 2 minutes at " + strCoord, twitteruser, twitterpass)
+
+    if mphspeed > 1 and stopstate == 1:
+    	stopstate == 0
+	logging.info("Vehicle has started moving")
+	if tweeted == 0:
+		tweeted = 1
+		tweet("Moving again, at " + strCoord, twitteruser, twitterpass)
+
+#    if dateutil.parser.parse(session.utc) > date:
+#       print 'Turn the backlight up or down'
+#    elif dateutil.parser.parse(session.utc) < date:
+#       print 'Turn the backlight up or down'
+
+    #Put low speed numbers on one screen, and big numbers on another. Switch when appropriate...
+    if session.status == 0:
+	lcd_make_screen_active(Main,Screen2)
+	w1str = timestr + ' ' + datestr
+	w2str = str(len(session.satellites)) + " sats. No lock"
+	#Lets just append during testing
+	#appendcsv(session.fix.latitude,session.fix.longitude,session.fix.altitude,session.fix.speed,datestr,timestr)
+
+    if session.status == 1:
+    	# Start doing stuff that we should be doing when we have a lock...
+	# Like appending to the CSV/GPX file
+
+        appendcsv(session.fix.latitude,session.fix.longitude,session.fix.altitude,session.fix.speed,datestr,timestr)
+	if mphspeed < switchspeed:
+		lcd_make_screen_active(Main,Screen2)
+        	w1str = timestr + ' ' + datestr
+        	w2str = str(len(session.satellites)) + " sats. Locked"
+		w3str = strCoord
+		#w3str = str(round(session.fix.latitude,4)) + latsuffix + ', ' + str(round(session.fix.longitude,4)) + longsuffix
+		if mphspeed == 0:
+			if ignition == 0:
+                        	w4str = "Ignition is off"
+                	elif ignition == 1:     
+                        	w4str = "Ignition is on"
+		w4str = str(mphspeed) + 'mph'
+	elif mphspeed > switchspeed:
+		mphspeed = str(mphspeed)
+		lcd_make_screen_active(Screen2,Main)
+        	lcd.widget_set(Screen2,w1,'1 "' + mphspeed[0] + '"')
+		lcd.widget_set(Screen2,w2,'6 "' + mphspeed[1] + '"')
+        	#lcd.widget_set(Screen2,w2,'11 "' + mphspeed[2] + '"')
+
+#    if dateutil.parser.parse(session.utc) > date:
+#	print 'Turn the backlight up or down'
+#    elif dateutil.parser.parse(session.utc) < date:
+#	print 'Turn the backlight up or down'
+
+    # Update the LCD screen
+    logging.debug("LCD screen dump")
+    logging.debug("What follows is LCD data")
+    logging.debug("--------------------")
+    logging.debug(w1str)
+    logging.debug(w2str)
+    logging.debug(w3str)
+    logging.debug(w4str)
+
+    lcd.widget_set(Main,w1,'1 1 "' + w1str + '"')
+    lcd.widget_set(Main,w2,'1 2 "' + w2str + '"')
+    lcd.widget_set(Main,w3,'1 3 "' + w3str + '"')
+    lcd.widget_set(Main,w4,'1 4 "' + w4str + '"')
+
+    kbfunc()
+
+    time.sleep(0.5)

@@ -1,0 +1,71 @@
+USB GPS reciever always present at /dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0
+USB LCD display always present at /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
+
+LICENCE
+-------
+GPL3, Kyle Gordon kyle@lodge.glasgownet.com
+
+REQUIREMENTS
+------------
+pylcd
+python-gps
+python-dateutil
+python-ftdi
+curl
+python-bluez
+python-serial
+
+INSTALLING PyLCD
+----------------
+tar xvf pylcd-0.2.tar.gz
+cd pylcd-0.2
+python setup.py install 
+
+INSTALLING CARTRACKER
+---------------------
+Copy it into somewhere sensible. ie /usr/local/cartracker/
+
+Owned as the user that will be providing the schedule SVN pulls
+
+INIT SCRIPT
+-----------
+Fired from rc.local. Cos I can't be arsed with SysV. Script will trigger its own shutdown when appropriate
+
+ONBOARD TIME
+------------
+The board has no RTC, so an external time source must be provided. GPS acts as a stratum 0 source, so can be fed through to GPSD for Stratum 1 clients.
+Use the -n switch to update the system clock even when no clients are connected - http://gpsd.berlios.de/gpsd.html
+
+INSTALLING BLUETOOTH & PAIRING UP
+---------------------------------
+apt-get install bluetooth python-gobject python-dbus
+Find the device with 'hcitool scan'
+In a separate terminal, start a simple passkey agent
+/usr/share/doc/bluez/examples/simple-agent
+Open a new terminal, and pair with the device with
+hcitool cc 00:21:BA:DB:32:19 ; hcitool auth 00:21:BA:DB:32:19
+Simple-agent will now be prompting for a PIN. Enter a PIN, and then enter it on the phone when prompted.
+All being well, hcitool auth won't fail with i/o error
+Devices are now paired
+
+SETTING UP PAND NETWORKING
+--------------------------
+modprobe bnep
+edit /etc/default/bluetooth
+change PAND_ENABLED=0 to PAND_ENABLED=1
+
+=======
+Need ncurses.h for curses lcdproc driver
+
+-----------------------------
+Related notes, bookmarks, etc
+
+Various Python apps, including Bluetooth detection and Planet.osm location
+http://gagravarr.org/code/
+
+IMPROVEMENTS
+------------
+
+A journey log that can be generated after 10 minutes of no movement. Include data such as start time & location, end time & location, distance travelled, average speed, and maybe attach the GPX file.
+Cartracker could also keep track of maintenance intervals, tasks needing done, etc. Send out email when service is required, UJs need greased, etc
+USB Accelerometer to measure road smoothness averaged over 50m segments
