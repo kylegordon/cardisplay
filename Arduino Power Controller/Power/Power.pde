@@ -24,24 +24,24 @@
 
 // constants won't change. They're used here to 
 // set pin numbers:
-const int buttonPin = 2;     // the number of the pushbutton pin
-const int stateLED =  13;      // the number of the LED pin
-const int outputLED = 12;
+const byte buttonPin = 2;     // the number of the pushbutton pin
+const byte stateLED =  13;      // the number of the LED pin
+const byte outputLED = 12;
 
 // variables will change:
-int buttonState = 0;         // variable for reading the pushbutton status
+
 int ontimeout = 5000;        // time to wait before turning on
 int offtimeout = 15000;      // time to wait before turning off
-int timestored = 0;
 int timetogo = 0;
 
 long previousMillis = 0;      // last update time
 long elapsedMillis = 0;       // elapsed time
 long storedMillis = 0;  
 
+boolean timestored = 0;
+boolean buttonState = 0;         // variable for reading the pushbutton status
 boolean active = false;
 boolean countingdown = false;
-boolean statusLEDstate = 0;
 
 void setup() {
   // initialize the LED pins as outputs:
@@ -52,7 +52,7 @@ void setup() {
 
   // Initialize the serial port
   Serial.begin(57600);
-  Serial.println("\nHello!");
+  Serial.println("\n[cartracker]");
   delay(500);
 }
 
@@ -60,7 +60,7 @@ void loop(){
   unsigned long currentMillis = millis();
   // Serial.print("Time is ");
   // Serial.println(currentMillis);
-  delay(10);
+  // delay(10);
   
   // read the state of the pushbutton value:
   buttonState = digitalRead(buttonPin);
