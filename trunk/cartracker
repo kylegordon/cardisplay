@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-1 -*-
 import sys
-import gps
 import os
 import time
 #import date
@@ -13,6 +12,9 @@ import csv
 import select
 import logging
 import pylcd
+
+from gps import *
+(gpshost, gpsport, gpsdevice) = ("localhost", "2947", None)
 
 # Import the Data Acquisition module
 # Must be in the same directory as cartracker
@@ -28,19 +30,28 @@ from datetime import datetime, timedelta
 # Needed for Tweet function
 from os import popen
 
-LOGFILE = "/tmp/cartracker.log"
-debug = 1
+import ConfigParser
+
+# Read the config file
+config = ConfigParser.RawConfigParser()
+config.read('cartracker.cfg')
+
+LOGFILE = config.get('global', 'logfile')
+
+debug = config.get('global', 'debug')
 old_status = 0 # Used to detect a state change of GPS lock
 latsuffix = "?"
 longsuffix = "?"
 date = ''
-switchspeed = 10 # The speed at which to split from a detailed screen to a simple screen
+switchspeed = config.get('global', 'switchspeed') # The speed at which to split from a detailed screen to a simple screen
 outputdir = '/tmp/'
 stationary = 0
-twitteruser = "s3rudolph"
-twitterpass = "Cech7oom"
+twitteruser = config.get('twitter', 'user')
+twitterpass = config.get('twitter', 'pass')
 tweeted = 0
 connected = 0
+
+chanIgnition = config.get('dlp-io8g', 'ignition')
 
 LEVELS = {'debug': logging.DEBUG,
           'info': logging.INFO,
@@ -95,8 +106,11 @@ def checkignition():
 	
 	# Call daq.whatever() and check the state of the ignition line, make it boolean, whatever
 	# FIXME
-	chanIgnition = 1	
-	ignition = daq.one(chanIgnition)
+	# Should we really just poll all channels at once?
+	if daq:
+		ignition = daq.one(chanIgnition)
+	else:
+		ignition = 1
 
 def saveandexit():
         # The save is blocking, so we can save and then drop the shutdown       
@@ -179,15 +193,15 @@ def printgpsdata():
 	print
 	print 'GPS reading'
 	print '----------------------------------------'
-	print 'status      ' , session.status
+	print 'Fix mode    ' , session.fix.mode
 	print 'GPS ID      ' , session.gps_id
 	print 'lat/long    ' , session.fix.latitude , ',' , session.fix.longitude
 	print 'rounded     ' , round(session.fix.latitude,4),',',round(session.fix.longitude,4)
 	print 'time utc    ' , session.utc, session.fix.time
 	print 'altitude    ' , session.fix.altitude
-	print 'eph         ' , session.fix.eph
-	print 'epv         ' , session.fix.epv
-	print 'ept         ' , session.fix.ept
+	print 'Precision, H' , session.fix.epx
+	print 'Precision, V' , session.fix.epv
+	print 'Precision   ' , session.fix.ept
 	print 'speed(m/s)  ' , session.fix.speed
 	print 'speed(mph)  ' , session.fix.speed * 2.237
 	print 'climb       ' , session.fix.climb
@@ -295,7 +309,7 @@ if not gpsdpid or not daq:
 		w4str = w1str # Make bottom row the same as top row
 		lcd.widget_set(Main,w1,'1 1 "' + w1str + '"')
                 lcd.widget_set(Main,w4,'1 4 "' + w4str + '"')
-		time.sleep(1)
+		time.sleep(0.1)
 	#sys.exit()
 else:
 	# Give a short status display before proceeding
@@ -309,29 +323,43 @@ w3str = ''
 w4str = ''
 
 #Start the GPS session last. This way we can spit out errors to the LCD screen first
-session = gps.gps()
+#session = gps(mode=WATCH_ENABLE)
+session = gps(host=gpshost,
+	port=gpsport,
+	mode=WATCH_ENABLE|WATCH_JSON|WATCH_SCALED,
+	verbose=debug)
+
 
 stopstate = 0
 global ignition
 ignition = 0
 
 while 1:
-    
+
     # Check the ignition state
     # Although it was set to 0 above, it should now be true as this system only starts when the engine is running
     ignition = checkignition()
-    print "Ignition is " + str(ignition)
+    ## print "Ignition is " + str(ignition)
 
     #Since using the logging module, this is no longer relevant
-    #if debug: os.system('clear')
-    session.query('admosyi')
+    if debug: os.system('clear')
+    # session.query('admosyi') ## This is apparently redundant now
     # a = altitude, d = date/time, m=mode,
     # o=postion/fix, s=status, y=satellites
     # see man -s gpsd
+
+    # report = session.next()
+    # print report
+    if session.poll() == -1:
+	print "daemon error"
+    if session.valid & PACKET_SET:
+	if debug: printgpsdata()
+	if debug: print session.data
    
     # Since using the logging module, some other method will be required to dump GPS info to console...
     # if debug: printgpsdata()
-
+    
+    # GPS speed is in meters per second. We need to make it usable
     mphspeed = session.fix.speed * 2.237
 
     d2 = dateutil.parser.parse(session.utc)
@@ -357,11 +385,11 @@ while 1:
     strLongitude = str(round(session.fix.longitude,4)) + longsuffix
     strCoord = strLatitude +", " + strLongitude
 
-    if old_status != session.status:
+    if old_status != session.fix.mode:
 	logging.info("State change!")
     else:
 	logging.debug("No state change...")
-    old_status = session.status
+    old_status = session.fix.mode
    
     if ignition == 0:
     	ignitionofftime = datetime.now()
@@ -382,7 +410,7 @@ while 1:
 		stoptime = datetime.now()
 	elif stopstate == 1:
 		stoptimedelta = datetime.now() - stoptime # Figure out how long we've been stopped for
-		logging.info("Stopped for - " + stoptimedelta)
+		logging.info("Stopped for - " + str(stoptimedelta))
 		if stoptimedelta >= timedelta(minutes=2): 
 			logging.info("Vehicle has stopped for over 2 minutes")
 			if tweeted == 0:
@@ -402,18 +430,23 @@ while 1:
 #       print 'Turn the backlight up or down'
 
     #Put low speed numbers on one screen, and big numbers on another. Switch when appropriate...
-    if session.status == 0:
+    if session.fix.mode == 1:
 	lcd_make_screen_active(Main,Screen2)
 	w1str = timestr + ' ' + datestr
 	w2str = str(len(session.satellites)) + " sats. No lock"
 	#Lets just append during testing
 	#appendcsv(session.fix.latitude,session.fix.longitude,session.fix.altitude,session.fix.speed,datestr,timestr)
 
-    if session.status == 1:
+    if session.fix.mode > 1:
     	# Start doing stuff that we should be doing when we have a lock...
 	# Like appending to the CSV/GPX file
 
-        appendcsv(session.fix.latitude,session.fix.longitude,session.fix.altitude,session.fix.speed,datestr,timestr)
+	if mphspeed > 2:
+		# Start recording data
+		# FIXME
+		# Should we remove the sleep at the end of the main loop and use timedelta here?
+		appendcsv(session.fix.latitude,session.fix.longitude,session.fix.altitude,session.fix.speed,datestr,timestr)
+
 	if mphspeed < switchspeed:
 		lcd_make_screen_active(Main,Screen2)
         	w1str = timestr + ' ' + datestr
@@ -453,5 +486,8 @@ while 1:
     lcd.widget_set(Main,w4,'1 4 "' + w4str + '"')
 
     kbfunc()
+    
+    # FIXME
+    # Should we remove this sleep at the end of the main loop and use timedeltas in other places (such as datalogging)?
 
     time.sleep(0.5)
