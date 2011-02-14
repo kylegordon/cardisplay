@@ -1,26 +1,24 @@
 /*
-  Button
+ Control relay actived PSU by monitoring ignition and oil pressure state. 
  
- Turns on and off a light emitting diode(LED) connected to digital  
- pin 13, when pressing a pushbutton attached to pin 7. 
+ created 2011
+ by Kyle Gordon <kyle@lodge.glasgownet.com>
  
- 
- The circuit:
- * LED attached from pin 13 to ground 
- * pushbutton attached to pin 2 from +5V
- * 10K resistor attached to pin 2 from ground
- 
- * Note: on most Arduinos there is already an LED on the board
- attached to pin 13.
- 
- 
- created 2005
- by DojoDave <http://www.0j0.org>
- modified 17 Jun 2009
- by Tom Igoe
- 
- http://www.arduino.cc/en/Tutorial/Button
- */
+ http://lodge.glasgownet.com
+*/
+
+#include <Ports.h>
+#include <RF12.h>
+
+Port relays (1);
+Port optoIn (2);
+
+// has to be defined because we're using the watchdog for low-power waiting
+ISR(WDT_vect) { Sleepy::watchdogEvent(); }
+
+int DEBUG = 1;
+int optostate1 = 0;
+int optostate2 = 0;
 
 // constants won't change. They're used here to 
 // set pin numbers:
@@ -44,15 +42,30 @@ boolean active = false;
 boolean countingdown = false;
 
 void setup() {
+  if (DEBUG) {           // If we want to see the pin values for debugging...
+    Serial.begin(57600);  // ...set up the serial ouput on 0004 style
+    Serial.println("\n[cartracker]");
+  }
+
+  rf12_initialize(30, RF12_868MHZ, 5);
+
+  relays.digiWrite(0);
+  relays.mode(OUTPUT);
+  relays.digiWrite2(0);
+  relays.mode2(OUTPUT);
+
+  // connect to opto-coupler plug as inputs with pull-ups enabled
+  optoIn.digiWrite(1);
+  optoIn.mode(INPUT);
+  optoIn.digiWrite2(1);
+  optoIn.mode2(INPUT);
+
   // initialize the LED pins as outputs:
   pinMode(stateLED, OUTPUT);
   pinMode(outputLED, OUTPUT);;  
   // initialize the pushbutton pin as an input:
   pinMode(buttonPin, INPUT);     
 
-  // Initialize the serial port
-  Serial.begin(57600);
-  Serial.println("\n[cartracker]");
   delay(500);
 }
 
@@ -61,6 +74,13 @@ void loop(){
   // Serial.print("Time is ");
   // Serial.println(currentMillis);
   // delay(10);
+
+  if (rf12_recvDone() && rf12_crc == 0 && rf12_len == 1) {
+    if (DEBUG == 1) {
+      Serial.print("Recieved : ");
+      Serial.println(rf12_data[0]);
+    }
+  }
   
   // read the state of the pushbutton value:
   buttonState = digitalRead(buttonPin);
