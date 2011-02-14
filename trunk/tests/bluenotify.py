@@ -6,7 +6,7 @@ client_sockets = []
 
 server_socket.bind(("",bluetooth.PORT_ANY))
 port = server_socket.getsockname()[1]
-uuid = "00001101-0000-1000-8000-00805F9B34FB"
+uuid = "7674047E-6E47-4BF0-831F-209E3F9DD23F"
 
 print "Listening for devices..."
 
