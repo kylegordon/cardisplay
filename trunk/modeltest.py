@@ -44,24 +44,29 @@ trkend=7
 wpt=8
 gpxend=9
 
-# Dump some of it out to see if it works - at all
+def runtest():
+	# Dump some of it out to see if it works - at all
 
-lat = 10
-lon = 20
-time = 30
-desc = "some text"
+	lat = 10
+	lon = 20
+	time = 30
+	desc = "some text"
 
-print model[gpxheader]
-print model[metadata] % (time)
-print model[trkstart]
-print model[trksegstart]
-print model[trkpt] % (lat, lon, time)
-print model[trkptdesc] % (lat, lon, time, desc)
-print model[trksegend]
-print model[trkend]
-print model[wpt] % (desc)
-print model[gpxend]
-
-
-# sys.stdout.write(model[0])
+	print model[gpxheader]
+	print model[metadata] % (time)
+	print model[trkstart]
+	print model[trksegstart]
+	print model[trkpt] % (lat, lon, time)
+	print model[trkptdesc] % (lat, lon, time, desc)
+	print model[trksegend]
+	print model[trkend]
+	print model[wpt] % (desc)
+	print model[gpxend]
+	
+if __name__ == '__main__':
+	print 'This program is being run by itself'
+	print 'Dumping entire model'
+	runtest()
+else:
+	print 'I am being imported from another module'
 
