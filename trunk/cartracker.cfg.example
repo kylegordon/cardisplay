@@ -1,0 +1,14 @@
+[global]
+debug = 1
+logfile = /tmp/cartracker.log
+switchspeed = 10
+
+[twitter]
+user = twitteraccount
+pass = twitterpassword
+
+[dlp-io8g]
+# Channel assignments
+ignition = 1
+lights = 2
+
