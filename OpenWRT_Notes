@@ -3,13 +3,14 @@ opkg install python
 opkg install curl
 opkg install wget
 opkg install distribute
+opkg install subversion
 
-
-INSTALLING PIP
-==============
+# INSTALLING PIP
+================
 
 curl --insecure -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py 
 python get-pip.py
 
 pip install python-dateutil
+
 
