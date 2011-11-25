@@ -2,7 +2,7 @@
 ## Copies stuff to the right places
 
 LCDPROCSRC=/usr/src/lcdproc/
-CARTRACKERSRC=/usr/local/cartracker/
+CARTRACKERSRC=/usr/src/cartracker/
 
 cd $LCDPROCSRC
 ./configure --enable-drivers=SureElec --prefix=/usr
