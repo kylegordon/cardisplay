@@ -1,4 +1,4 @@
-!#/bin/bash
+#!/bin/bash
 ## Copies stuff to the right places
 
 LCDPROCSRC=/usr/src/lcdproc/
