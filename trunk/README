@@ -5,6 +5,12 @@ LICENCE
 -------
 GPL3, Kyle Gordon kyle@lodge.glasgownet.com
 
+NETWORK
+-------
+
+Static address on eth0:1 - 192.168.1.240, netmask 255.255.255.0
+DHCP on eth0
+
 REQUIREMENTS
 ------------
 pylcd
