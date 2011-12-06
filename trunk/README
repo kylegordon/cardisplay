@@ -29,14 +29,16 @@ python-serial
 INSTALLING PyLCD
 ----------------
 tar xvf pylcd-0.2.tar.gz
+* OR *
+svn co svn+ssh://bagpuss@lodge.glasgownet.com/home/bagpuss/svn/home/scripts/pylcd-0.2
 cd pylcd-0.2
 python setup.py install 
 
 INSTALLING CARTRACKER
 ---------------------
 Copy it into somewhere sensible. ie /usr/local/cartracker/
-
 Owned as the user that will be providing the schedule SVN pulls
+Take the cartracker.cfg.example file and edit to suit, then save as cartracker.cfg
 
 INIT SCRIPT
 -----------
