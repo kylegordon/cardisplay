@@ -13,9 +13,8 @@ DHCP on eth0
 
 GPIO
 ====
-Disabled getty (/etc/inittab) on /dev/ttyS0 (don't know if this is vital, still unable to export GPIO 7 and 8)
 modprobe rdc321x_gpio
-modprobe i2c-gpio-custom bus0=0,8,7
+Enter the above modules in /etc/modules
 
 REQUIREMENTS
 ------------
