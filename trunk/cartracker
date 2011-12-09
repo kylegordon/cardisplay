@@ -107,10 +107,16 @@ def checkignition():
 	# Call daq.whatever() and check the state of the ignition line, make it boolean, whatever
 	# FIXME
 	# Should we really just poll all channels at once?
-	if daq:
-		ignition = daq.one(chanIgnition)
-	else:
-		ignition = 1
+	#if daq:
+	#	ignition = daq.one(chanIgnition)
+	#else:
+	#	ignition = 1
+
+  def get_rotation():
+    gpio7 = open("/sys/class/gpio/gpio7/value", 'r' )
+    ignition = not [int(gpio7.readline())]
+    gpio7.close()
+    return ignition
 
 def saveandexit():
         # The save is blocking, so we can save and then drop the shutdown       
