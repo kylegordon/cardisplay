@@ -283,7 +283,7 @@ w1str = "===================="
 w4str = "===================="
 
 #Test for GPSD running and prepare some status messages
-gpsdpid = process_num('/usr/sbin/gpsd')
+gpsdpid = process_num('gpsd')
 if gpsdpid:
 	w2str = "GPSD running: " + gpsdpid
 else:
