@@ -194,7 +194,10 @@ def lcd_make_screen_active(active,background):
         lcd.screen_set(active,"-priority info")
         lcd.screen_set(background,"-priority background")
 
-def printgpsdata():
+def printdata():
+	os.system('clear')
+	print
+	print "Ignition is " + str(ignition)
 	print
 	print 'GPS reading'
 	print '----------------------------------------'
@@ -212,6 +215,8 @@ def printgpsdata():
 	print 'climb       ' , session.fix.climb
 	print
 	print 'Satellites (total of', len(session.satellites) , 'in view)'
+	print
+	print session.data()
 	# Display summary of all satellite data. Makes the display jump about a bit though
 	# for i in session.satellites:
 	#	print '\t', i
@@ -353,10 +358,9 @@ while 1:
     # Check the ignition state
     # Although it was set to 0 above, it should now be true as this system only starts when the engine is running
     ignition = checkignition()
-    print "Ignition is " + str(ignition)
 
     #Since using the logging module, this is no longer relevant
-    if debug: os.system('clear')
+    # if debug: os.system('clear')
     # session.query('admosyi') ## This is apparently redundant now
     # a = altitude, d = date/time, m=mode,
     # o=postion/fix, s=status, y=satellites
@@ -367,11 +371,10 @@ while 1:
     if session.poll() == -1:
 	print "daemon error"
     if session.valid & PACKET_SET:
-	if debug: printgpsdata()
-	if debug: print session.data
+	if debug: printdata()
    
     # Since using the logging module, some other method will be required to dump GPS info to console...
-    # if debug: printgpsdata()
+    # if debug: printdata()
     
     # GPS speed is in meters per second. We need to make it usable
     mphspeed = session.fix.speed * 2.237
