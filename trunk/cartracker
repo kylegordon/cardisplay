@@ -34,7 +34,7 @@ import ConfigParser
 
 # Read the config file
 config = ConfigParser.RawConfigParser()
-config.read('cartracker.cfg')
+config.read('/etc/cartracker/cartracker.cfg')
 
 LOGFILE = config.get('global', 'logfile')
 
