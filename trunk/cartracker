@@ -222,7 +222,7 @@ def dumpdata():
 	logging.debug("speed(m/s)  " + str(session.fix.speed))
 	logging.debug("speed(mph)  " + str(session.fix.speed * 2.237))
 	logging.debug("climb       " + str(session.fix.climb))
-	logging.debug("Satellites (total of', len(session.satellites) , 'in view)")
+	logging.debug("Satellites  " + str(len(session.satellites)))
 	## logging.debug(str(session.data()))
 	# Display summary of all satellite data. Makes the display jump about a bit though
 	# for i in session.satellites:
@@ -504,7 +504,7 @@ while 1:
     lcd.widget_set(Main,w3,'1 3 "' + w3str + '"')
     lcd.widget_set(Main,w4,'1 4 "' + w4str + '"')
 
-    kbfunc()
+    # kbfunc()
     
     # FIXME
     # Should we remove this sleep at the end of the main loop and use timedeltas in other places (such as datalogging)?
