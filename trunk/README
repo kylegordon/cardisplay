@@ -44,6 +44,17 @@ INIT SCRIPT
 -----------
 Fired from rc.local. Cos I can't be arsed with SysV. Script will trigger its own shutdown when appropriate
 
+GPSD
+----
+Make sure GPSD is installed and running.
+You probably want to ensure at the very least START_DAEMON is set to true in /etc/default/gpsd (on Debian systems)
+Also in /etc/default/gpsd USBAUTO has been known to work too... although this may interfere with LCD on USB
+
+On the Bifferboard Debian install GPSD dropped privs to nobody as expected, but was then unable to read /dev/ttyUSB* even though they were mode 777
+Compiling gpsd-3.3 caused an internal error crash when run, but 2.95 works fine. 2.95 was configured with ./configure --enable-gpsd-user=root
+The /etc/init.d/gpsd script and /etc/default/gpsd was taken from a working debian install, and modified to suit the location of the gpsd binaries
+The /etc/default/gpsd script was taken from a working debian install, and modified as above
+
 ONBOARD TIME
 ------------
 The board has no RTC, so an external time source must be provided. GPS acts as a stratum 0 source, so can be fed through to GPSD for Stratum 1 clients.
