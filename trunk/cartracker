@@ -35,10 +35,10 @@ import ConfigParser
 # Read the config file
 config = ConfigParser.RawConfigParser()
 config.read('/etc/cartracker/cartracker.cfg')
+debug = config.getboolean('global', 'debug')
 
 LOGFILE = config.get('global', 'logfile')
 
-debug = config.get('global', 'debug')
 old_status = 0 # Used to detect a state change of GPS lock
 latsuffix = "?"
 longsuffix = "?"
@@ -59,10 +59,12 @@ LEVELS = {'debug': logging.DEBUG,
           'error': logging.ERROR,
           'critical': logging.CRITICAL}
 
-logging.basicConfig(filename=LOGFILE,level=logging.INFO)
+if debug == 0: logging.basicConfig(filename=LOGFILE,level=logging.INFO)
+if debug == 1: logging.basicConfig(filename=LOGFILE,level=logging.DEBUG)
 
 logging.info('Starting cartracker')
-logging.debug('Info entry')
+logging.info('INFO MODE')
+logging.debug('DEBUG MODE')
 
 model = [
 """<?xml version="1.0" encoding="UTF-8"?>
@@ -135,7 +137,7 @@ def dojourneylog():
 	# FIXME
 	# Figure out some stats like start time & location, end time & location, distance travelled, average speed, and maybe attach the GPX file.
 	# We could probably work this out by reading the start and end of gpx trace and doing magic
-	print "Creating and emailing journey log"
+	logging.info("Creating and emailing journey log")
 
 def createfiles():
 	# Whip up the filename for the current file
@@ -195,7 +197,7 @@ def lcd_make_screen_active(active,background):
         lcd.screen_set(background,"-priority background")
 
 def printdata():
-	os.system('clear')
+	##os.system('clear')
 	print
 	print "Debug is " + str(debug)
 	print "Ignition is " + str(ignition)
@@ -241,9 +243,6 @@ lcd=pylcd.client()
 logging.info('Connect message:' + lcd.connect())
 logging.info('Info as know by the module:')
 lcd.getinfo()
-#print 'Setting some info to the display.'
-
-#(sysname, nodename, release, version, machine)=os.uname()
 
 #Define some screens
 Main='main'
@@ -361,7 +360,6 @@ while 1:
     ignition = checkignition()
 
     #Since using the logging module, this is no longer relevant
-    # if debug: os.system('clear')
     # session.query('admosyi') ## This is apparently redundant now
     # a = altitude, d = date/time, m=mode,
     # o=postion/fix, s=status, y=satellites
@@ -371,8 +369,8 @@ while 1:
     # print report
     if session.poll() == -1:
 	print "daemon error"
-    if session.valid & PACKET_SET:
-	if debug: printdata()
+    #if session.valid & PACKET_SET:
+	#if debug: printdata()
    
     # Since using the logging module, some other method will be required to dump GPS info to console...
     # if debug: printdata()
