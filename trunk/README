@@ -49,6 +49,7 @@ GPSD
 Make sure GPSD is installed and running.
 You probably want to ensure at the very least START_DAEMON is set to true in /etc/default/gpsd (on Debian systems)
 Also in /etc/default/gpsd USBAUTO has been known to work too... although this may interfere with LCD on USB
+Included /dev/serial/by-path/pci-0000:00:0a.1-usb-0:1.2:1.0-port0 in the DEVICES parameters. Theres's a 64 character limit here, so /dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0 fails, sadly
 
 On the Bifferboard Debian install GPSD dropped privs to nobody as expected, but was then unable to read /dev/ttyUSB* even though they were mode 777
 Compiling gpsd-3.3 caused an internal error crash when run, but 2.95 works fine. 2.95 was configured with ./configure --enable-gpsd-user=root
