@@ -112,11 +112,10 @@ def checkignition():
 	#else:
 	#	ignition = 1
 
-  def get_rotation():
-    gpio7 = open("/sys/class/gpio/gpio7/value", 'r' )
-    ignition = not [int(gpio7.readline())]
-    gpio7.close()
-    return ignition
+	gpio7 = open("/sys/class/gpio/gpio7/value", 'r' )
+	ignition = not [int(gpio7.readline())]
+	gpio7.close()
+	return ignition
 
 def saveandexit():
         # The save is blocking, so we can save and then drop the shutdown       
@@ -335,10 +334,14 @@ w4str = ''
 
 #Start the GPS session last. This way we can spit out errors to the LCD screen first
 #session = gps(mode=WATCH_ENABLE)
+#session = gps(host=gpshost,
+#	port=gpsport,
+#	mode=WATCH_ENABLE|WATCH_JSON|WATCH_SCALED,
+#	verbose=debug)
+
 session = gps(host=gpshost,
-	port=gpsport,
-	mode=WATCH_ENABLE|WATCH_JSON|WATCH_SCALED,
-	verbose=debug)
+        port=gpsport,
+	mode=WATCH_ENABLE|WATCH_JSON|WATCH_SCALED)
 
 
 stopstate = 0
@@ -350,7 +353,7 @@ while 1:
     # Check the ignition state
     # Although it was set to 0 above, it should now be true as this system only starts when the engine is running
     ignition = checkignition()
-    ## print "Ignition is " + str(ignition)
+    print "Ignition is " + str(ignition)
 
     #Since using the logging module, this is no longer relevant
     if debug: os.system('clear')
