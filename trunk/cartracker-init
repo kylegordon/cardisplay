@@ -57,7 +57,7 @@ do_start()
 	echo in > /sys/class/gpio/gpio8/direction
 	start-stop-daemon -b --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
 		|| return 1
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- \
+	start-stop-daemon -b --start --quiet --pidfile $PIDFILE --exec $DAEMON -- \
 		$OPTIONS \
 		|| return 2
 }
