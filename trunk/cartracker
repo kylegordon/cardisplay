@@ -197,6 +197,7 @@ def lcd_make_screen_active(active,background):
 def printdata():
 	os.system('clear')
 	print
+	print "Debug is " + str(debug)
 	print "Ignition is " + str(ignition)
 	print
 	print 'GPS reading'
