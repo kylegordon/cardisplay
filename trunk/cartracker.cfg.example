@@ -1,6 +1,6 @@
 [global]
 debug = 1
-logfile = /tmp/cartracker.log
+logfile = /var/log/cartracker.log
 switchspeed = 10
 
 [twitter]
