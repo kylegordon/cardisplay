@@ -1,16 +1,34 @@
+# In theory this script is executable...
+
 opkg update
 opkg install python
 opkg install curl
 opkg install wget
 opkg install distribute
-opkg install subversion
+opkg install subversion-client
+opkg install gpsd
+
+mkdir /usr/local
+cd /usr/local
+svn co svn+ssh://bagpuss@lodge.glasgownet.com/home/bagpuss/svn/home/scripts/cartracker
 
 # INSTALLING PIP
-================
+# ================
 
 curl --insecure -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py 
 python get-pip.py
 
-pip install python-dateutil
+# INSTALLING PYLCD
+# ==================
 
+cd /usr/local
+svn co svn+ssh://bagpuss@lodge.glasgownet.com/home/bagpuss/svn/home/scripts/pylcd-0.2
+cd pylcd-0.2
+python setup.py install
+
+# INSTALLING PYTHON LIBS
+# ======================
+
+cd
+pip install python-dateutil
 
