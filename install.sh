@@ -2,10 +2,12 @@
 ## Copies stuff to the right places
 
 LCDPROCSRC=/usr/src/lcdproc/
-CARTRACKERSRC=/usr/src/cartracker/
+CARTRACKERSRC=/usr/local/cartracker/trunk/
 LCDPROCETC=/etc/lcdproc/
+CARTRACKERETC=/etc/cartracker/
 
 mkdir $LCDPROCETC
+mkdir $CARTRACKERETC
 
 cd $LCDPROCSRC
 ./configure --enable-drivers=SureElec --prefix=/usr
@@ -23,4 +25,7 @@ sed -i -e s/#CONFIGFILE/CONFIGFILE/ /etc/default/LCDd
 ## Do something to update DriverPath in LCDd.conf
 
 cd $CARTRACKERSRC
-
+cp cartracker-init /etc/init.d/cartracker
+cp cartracker-default /etc/default/
+cp cartracker.cfg.example $CARTRACKERETC
+update-rc.d cartracker defaults
