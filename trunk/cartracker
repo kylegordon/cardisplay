@@ -126,7 +126,6 @@ def checkignition():
 	ignition = not [int(gpio7.readline())]
 	gpio7.close()
 	return ignition
-	return 1
 
 def saveandexit():
         # The save is blocking, so we can save and then drop the shutdown       
