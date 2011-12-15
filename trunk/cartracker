@@ -135,7 +135,9 @@ def saveandexit():
 	dojourneylog()
 
 	os.system('sync')
-        os.system('echo shutdown -h +2')
+	os.system('logger Cartracker shutting the system down')
+        os.system('shutdown -h +2')
+	os.system('logger post shutdown command')
 
         # Say goodbye, assuming shutdown is non-blocking
         # FIXME
