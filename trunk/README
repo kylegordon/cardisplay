@@ -94,3 +94,5 @@ IMPROVEMENTS
 A journey log that can be generated after 10 minutes of no movement. Include data such as start time & location, end time & location, distance travelled, average speed, and maybe attach the GPX file.
 Cartracker could also keep track of maintenance intervals, tasks needing done, etc. Send out email when service is required, UJs need greased, etc
 USB Accelerometer to measure road smoothness averaged over 50m segments
+Use the Wireless RS232 for rudimentary geofencing?
+Use DLP-IO8G coupled to a ACS712ELC-30A (http://www.ebay.co.uk/itm/290645654975) for current sensing
