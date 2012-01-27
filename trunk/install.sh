@@ -2,7 +2,7 @@
 ## Copies stuff to the right places
 
 LCDPROCSRC=/usr/src/lcdproc/
-CARTRACKERSRC=/usr/local/cartracker/trunk/
+CARTRACKERSRC=.
 LCDPROCETC=/etc/lcdproc/
 CARTRACKERETC=/etc/cartracker/
 
