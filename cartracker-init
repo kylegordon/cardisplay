@@ -23,7 +23,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Cartracker daemon"
 NAME=cartracker
 #DAEMON=/usr/sbin/$NAME #Temp until system install
-DAEMON=/usr/local/$NAME/trunk/$NAME
+DAEMON=/usr/local/$NAME/$NAME
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
