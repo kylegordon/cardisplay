@@ -12,9 +12,6 @@
 ### END INIT INFO
 
 # Author: Kyle Gordon <kyle@lodge.glasgownet.com
-#
-# Please remove the "Author" lines above and replace them
-# with your own name if you copy and modify this script.
 
 # Do NOT "set -e"
 
@@ -22,7 +19,6 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Cartracker daemon"
 NAME=cartracker
-#DAEMON=/usr/sbin/$NAME #Temp until system install
 DAEMON=/usr/local/$NAME/$NAME
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
@@ -55,9 +51,9 @@ do_start()
 	echo 8 > /sys/class/gpio/export
 	echo in > /sys/class/gpio/gpio7/direction
 	echo in > /sys/class/gpio/gpio8/direction
-	start-stop-daemon -b --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
+	start-stop-daemon -b --start --quiet -m --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
 		|| return 1
-	start-stop-daemon -b --start --quiet --pidfile $PIDFILE --exec $DAEMON -- \
+	start-stop-daemon -b --start --quiet -m --pidfile $PIDFILE --exec $DAEMON -- \
 		$OPTIONS \
 		|| return 2
 }
