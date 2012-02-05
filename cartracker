@@ -144,6 +144,8 @@ def saveandexit():
         os.system('shutdown -h +2')
 	os.system('logger Shutdown command issued. Now shutting down')
 
+        lcd.widget_set(Main,w3,'1 4 "        READY        "')
+
         # Say goodbye, assuming shutdown is non-blocking
         # FIXME
         sys.exit(0)
