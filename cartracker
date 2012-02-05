@@ -374,6 +374,8 @@ while 1:
     # Check the ignition state
     # Although it was set to 0 above, it should now be true as this system only starts when the engine is running
     ignition = checkignition()
+    if ignition == 0:
+    	os.system('shutdown -h -t now')
 
     #Since using the logging module, this is no longer relevant
     # session.query('admosyi') ## This is apparently redundant now
