@@ -129,7 +129,7 @@ def checkignition():
 
 def saveandexit():
 
-	lcd_clear("main") //Clear the LCD screen
+	lcd_clear("main")
 	lcd.widget_set(Main,w2,'1 2 "    SHUTTING DOWN    "')
 	lcd.widget_set(Main,w3,'1 3 "         ...         "')
 
