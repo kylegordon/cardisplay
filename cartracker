@@ -20,6 +20,7 @@ import csv
 import select
 import logging
 import pylcd
+import signal
 
 from gps import *
 (gpshost, gpsport, gpsdevice) = ("localhost", "2947", None)
@@ -369,6 +370,8 @@ ignition = 0
 
 while 1:
 
+    signal.signal(signal.SIGTERM, saveandexit)
+
     # Check the ignition state
     # Although it was set to 0 above, it should now be true as this system only starts when the engine is running
     ignition = checkignition()
@@ -418,15 +421,16 @@ while 1:
 	logging.debug("No state change...")
     old_status = session.fix.mode
    
-    if ignition == 0:
-    	ignitionofftime = datetime.now()
-	ignitiontimedelta = datetime.now() - ignitionofftime # How long has the ignition been off for?
-    	if ignitiontimedelta >= timedelta(minutes=2):
-    		# Vehicle has turned off for more than two minutes
-		logging.info("Shutting down")
-		saveandexit()
-    elif ignition == 1:
-    	ignitiontimedelta = 0
+    # This chunk is no longer required, since the JeeNode decides when to turn off, and this script should catch SIGTERM and exit
+#    if ignition == 0:
+#    	ignitionofftime = datetime.now()
+#	ignitiontimedelta = datetime.now() - ignitionofftime # How long has the ignition been off for?
+#    	if ignitiontimedelta >= timedelta(minutes=2):
+#    		# Vehicle has turned off for more than two minutes
+#		logging.info("Shutting down")
+#		saveandexit()
+#    elif ignition == 1:
+#    	ignitiontimedelta = 0
     
     if mphspeed < 1:
     	if stopstate == 0:
