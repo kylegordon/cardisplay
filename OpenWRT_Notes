@@ -6,11 +6,12 @@ opkg install curl
 opkg install wget
 opkg install distribute
 opkg install subversion-client
+opkg install git
 opkg install gpsd
 
 mkdir /usr/local
 cd /usr/local
-svn co svn+ssh://bagpuss@lodge.glasgownet.com/home/bagpuss/svn/home/scripts/cartracker
+git clone https://github.com/kylegordon/cartracker.git
 
 # INSTALLING PIP
 # ================
