@@ -19,7 +19,8 @@ import errno
 import csv
 import select
 import logging
-import pylcd
+#import pylcd
+import lcdproc
 import signal
 
 from gps import *
@@ -132,6 +133,7 @@ def saveandexit(signum, frame):
 
         logging.info("Signal handler called with signal " + str(signum))
 
+    # FIXME
 	lcd_clear("main")
 	lcd.widget_set(Main,w2,'1 2 "    SHUTTING DOWN    "')
 	lcd.widget_set(Main,w3,'1 3 "         ...         "')
@@ -201,6 +203,7 @@ def process_num(process):
 
 def lcd_clear(screen):
 	# Blank out all the widgets on the requested screen
+    # FIXME
 	lcd.widget_set(screen,w1,'1 1 ""')
 	lcd.widget_set(screen,w2,'1 2 ""')
 	lcd.widget_set(screen,w3,'1 3 ""')
@@ -209,6 +212,7 @@ def lcd_clear(screen):
 def lcd_make_screen_active(active,background):
 	# Set the requested screen to active (info) and push the other to the background
 	# It's pretty primitive, and doesn't account for more than one background screen
+    # FIXME
         lcd.screen_set(active,"-priority info")
         lcd.screen_set(background,"-priority background")
 
@@ -250,6 +254,7 @@ strCoord = "0000"
 tweet("Starting up at : " + strCoord, twitteruser, twitterpass)
 
 # Start up the LCD
+# FIXME
 lcd=pylcd.client()
 logging.info('Connect message:' + lcd.connect())
 logging.info("Info as known by the module:" + str(lcd.getinfo()))
@@ -271,6 +276,7 @@ w3str='Empty line 3'
 w4str='Empty line 4'
 
 #Set up the first screen
+#FIXME
 lcd.screen_add(Main)
 lcd.screen_set(Main,"-heartbeat off")
 lcd.screen_set(Main,"-priority info")
@@ -316,6 +322,7 @@ else:
 	countdowndelay = 0.5
 
 #Display the loading info
+#FIXME
 lcd.widget_set(Main,w1,'1 1 "' + w1str + '"')
 lcd.widget_set(Main,w2,'1 2 "' + w2str + '"')
 lcd.widget_set(Main,w3,'1 3 "' + w3str + '"')
@@ -330,6 +337,7 @@ if not gpsdpid or not daq:
 	for i in range(20): # 20 chars wide...
 		w1str += '=' # Increment one of the = symbols
 		w4str = w1str # Make bottom row the same as top row
+        #FIXME
 		lcd.widget_set(Main,w1,'1 1 "' + w1str + '"')
                 lcd.widget_set(Main,w4,'1 4 "' + w4str + '"')
 		time.sleep(countdowndelay)
@@ -339,6 +347,7 @@ else:
 	time.sleep(5)
 	
 ## Comedy status update
+#FIXME
 lcd.widget_set(Main,w2,'1 2 "     ENVIRON CTR     "')
 lcd.widget_set(Main,w3,'1 3 "        PURGE        "')
 time.sleep(5)
@@ -463,6 +472,7 @@ while 1:
 
     #Put low speed numbers on one screen, and big numbers on another. Switch when appropriate...
     if session.fix.mode == 1:
+    #FIXME
 	lcd_make_screen_active(Main,Screen2)
 	w1str = timestr + ' ' + datestr
 	w2str = str(len(session.satellites)) + " sats. No lock"
@@ -480,6 +490,7 @@ while 1:
 		appendcsv(session.fix.latitude,session.fix.longitude,session.fix.altitude,session.fix.speed,datestr,timestr)
 
 	if mphspeed < switchspeed:
+        #FIXME
 		lcd_make_screen_active(Main,Screen2)
         	w1str = timestr + ' ' + datestr
         	w2str = str(len(session.satellites)) + " sats. Locked"
@@ -493,7 +504,8 @@ while 1:
 		w4str = str(mphspeed) + 'mph'
 	elif mphspeed > switchspeed:
 		mphspeed = str(mphspeed)
-		lcd_make_screen_active(Screen2,Main)
+		#FIXME
+        lcd_make_screen_active(Screen2,Main)
         	lcd.widget_set(Screen2,w1,'1 "' + mphspeed[0] + '"')
 		lcd.widget_set(Screen2,w2,'6 "' + mphspeed[1] + '"')
         	#lcd.widget_set(Screen2,w2,'11 "' + mphspeed[2] + '"')
@@ -512,6 +524,7 @@ while 1:
     logging.debug(w3str)
     logging.debug(w4str)
 
+    #FIXME
     lcd.widget_set(Main,w1,'1 1 "' + w1str + '"')
     lcd.widget_set(Main,w2,'1 2 "' + w2str + '"')
     lcd.widget_set(Main,w3,'1 3 "' + w3str + '"')
