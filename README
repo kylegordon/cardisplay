@@ -34,6 +34,17 @@ svn co svn+ssh://bagpuss@lodge.glasgownet.com/home/bagpuss/svn/home/scripts/pylc
 cd pylcd-0.2
 python setup.py install 
 
+INSTALLING LCDPROC
+------------------
+sudo pip install lcdproc
+
+CONFIGURE LCDPROC
+-----------------
+Ensure the following is in the [Server] section
+ServerScreen=no
+AutoRotate=no
+
+
 INSTALLING CARTRACKER
 ---------------------
 Copy it into somewhere sensible. ie /usr/local/cartracker/
