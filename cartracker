@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 
 
@@ -20,7 +20,8 @@ import csv
 import select
 import logging
 #import pylcd
-import lcdproc
+#import lcdproc
+from lcdproc.server import Server
 import signal
 
 from gps import *
@@ -43,6 +44,7 @@ from os import popen
 import ConfigParser
 
 # Read the config file
+#FIXME Check for file existence first
 config = ConfigParser.RawConfigParser()
 config.read('/etc/cartracker/cartracker.cfg')
 debug = config.getboolean('global', 'debug')
@@ -124,9 +126,10 @@ def checkignition():
 	#else:
 	#	ignition = 1
 
-	gpio7 = open("/sys/class/gpio/gpio7/value", 'r' )
+        gpio7 = open("/sys/class/gpio/gpio7/value", 'r' )
 	ignition = not [int(gpio7.readline())]
 	gpio7.close()
+        ignition = 1
 	return ignition
 
 def saveandexit(signum, frame):
@@ -203,11 +206,16 @@ def process_num(process):
 
 def lcd_clear(screen):
 	# Blank out all the widgets on the requested screen
-    # FIXME
-	lcd.widget_set(screen,w1,'1 1 ""')
-	lcd.widget_set(screen,w2,'1 2 ""')
-	lcd.widget_set(screen,w3,'1 3 ""')
-	lcd.widget_set(screen,w4,'1 4 ""')
+        # FIXME
+	#lcd.widget_set(screen,w1,'1 1 ""')
+	#lcd.widget_set(screen,w2,'1 2 ""')
+	#lcd.widget_set(screen,w3,'1 3 ""')
+	#lcd.widget_set(screen,w4,'1 4 ""')
+        line1_widget.set_text(w1str)
+        line2_widget.set_text(w2str)
+        line3_widget.set_text(w3str)
+        line4_widget.set_text(w4str)
+
 
 def lcd_make_screen_active(active,background):
 	# Set the requested screen to active (info) and push the other to the background
@@ -254,11 +262,15 @@ strCoord = "0000"
 tweet("Starting up at : " + strCoord, twitteruser, twitterpass)
 
 # Start up the LCD
-# FIXME
-lcd=pylcd.client()
-logging.info('Connect message:' + lcd.connect())
-logging.info("Info as known by the module:" + str(lcd.getinfo()))
-#lcd.getinfo()
+#lcd=pylcd.client()
+#lcd = Server("localhost", debug=True)
+#lcd.start_session()
+#logging.info('Connect message:' + lcd.connect())
+#logging.info("Info as known by the module:" + str(lcd.getinfo()))
+
+lcd = Server("localhost", debug=True)
+lcd.start_session()
+logging.info("LCD Session started")
 
 #Define some screens
 Main='main'
@@ -275,29 +287,48 @@ w2str='Empty line 2'
 w3str='Empty line 3'
 w4str='Empty line 4'
 
-#Set up the first screen
+# Set up the first screen. 4 lines of text
 #FIXME
-lcd.screen_add(Main)
-lcd.screen_set(Main,"-heartbeat off")
-lcd.screen_set(Main,"-priority info")
+#lcd.screen_add(Main)
+#lcd.screen_set(Main,"-heartbeat off")
+#lcd.screen_set(Main,"-priority info")
+#logging.debug("Giving Main priority info")
+#lcd.widget_add(Main,w1,'string')
+#lcd.widget_add(Main,w2,'string')
+#lcd.widget_add(Main,w3,'string')
+#lcd.widget_add(Main,w4,'string')
+
+screen1 = lcd.add_screen("Screen1")
+screen1.set_heartbeat("off")
+screen1.set_priority("info")
 logging.debug("Giving Main priority info")
-lcd.widget_add(Main,w1,'string')
-lcd.widget_add(Main,w2,'string')
-lcd.widget_add(Main,w3,'string')
-lcd.widget_add(Main,w4,'string')
+line1_widget = screen1.add_string_widget("line1_string", text="Line1", x=1, y=1)
+line2_widget = screen1.add_string_widget("line2_string", text="Line2", x=1, y=2)
+line3_widget = screen1.add_string_widget("line3_string", text="Line3", x=1, y=3)
+line4_widget = screen1.add_string_widget("line4_string", text="Line4", x=1, y=4)
 
-lcd.widget_set(Main,w1,'1 1 "Starting up"')
+#lcd.widget_set(Main,w1,'1 1 "Starting up"')
+line1_widget.set_text("Starting up")
 
-#Set up the second screen
-lcd.screen_add(Screen2)
-lcd.screen_set(Screen2,"-heartbeat off")
-lcd.screen_set(Screen2,"-priority background")
-logging.debug("Giving Screen2 priority background")
-lcd.widget_add(Screen2,w1,'num')
-lcd.widget_add(Screen2,w2,'num')
-lcd.widget_add(Screen2,w3,'num')
-lcd.widget_set(Screen2,w1,'1 "0"')
-lcd.widget_set(Screen2,w2,'6 "0"')
+# Set up the second screen. Big display with numbers
+#lcd.screen_add(Screen2)
+#lcd.screen_set(Screen2,"-heartbeat off")
+#lcd.screen_set(Screen2,"-priority background")
+#logging.debug("Giving Screen2 priority background")
+#lcd.widget_add(Screen2,w1,'num')
+#lcd.widget_add(Screen2,w2,'num')
+#lcd.widget_add(Screen2,w3,'num')
+#lcd.widget_set(Screen2,w1,'1 "0"')
+#lcd.widget_set(Screen2,w2,'6 "0"')
+
+screen2 = lcd.add_screen("Screen2")
+screen2.set_heartbeat("off")
+screen2.set_priority("background")
+logging.debug("Giving screen2 priority background")
+
+
+#KG
+time.sleep(5)
 
 #Test for some prerequisites.
 w1str = "===================="
@@ -323,10 +354,18 @@ else:
 
 #Display the loading info
 #FIXME
-lcd.widget_set(Main,w1,'1 1 "' + w1str + '"')
-lcd.widget_set(Main,w2,'1 2 "' + w2str + '"')
-lcd.widget_set(Main,w3,'1 3 "' + w3str + '"')
-lcd.widget_set(Main,w4,'1 4 "' + w4str + '"')
+#lcd.widget_set(Main,w1,'1 1 "' + w1str + '"')
+#lcd.widget_set(Main,w2,'1 2 "' + w2str + '"')
+#lcd.widget_set(Main,w3,'1 3 "' + w3str + '"')
+#lcd.widget_set(Main,w4,'1 4 "' + w4str + '"')
+line1_widget.set_text(w1str)
+line2_widget.set_text(w2str)
+line3_widget.set_text(w3str)
+line4_widget.set_text(w4str)
+
+#KG
+time.sleep(5)
+daq = 1
 
 # Quit if gpsd is not running
 if not gpsdpid or not daq:
@@ -337,9 +376,11 @@ if not gpsdpid or not daq:
 	for i in range(20): # 20 chars wide...
 		w1str += '=' # Increment one of the = symbols
 		w4str = w1str # Make bottom row the same as top row
-        #FIXME
-		lcd.widget_set(Main,w1,'1 1 "' + w1str + '"')
-                lcd.widget_set(Main,w4,'1 4 "' + w4str + '"')
+                #FIXME
+		#lcd.widget_set(Main,w1,'1 1 "' + w1str + '"')
+                #lcd.widget_set(Main,w4,'1 4 "' + w4str + '"')
+                line1_widget.set_text(w1str)
+                line4_widget.set_text(w4str)
 		time.sleep(countdowndelay)
 	#sys.exit()
 else:
@@ -348,9 +389,13 @@ else:
 	
 ## Comedy status update
 #FIXME
-lcd.widget_set(Main,w2,'1 2 "     ENVIRON CTR     "')
-lcd.widget_set(Main,w3,'1 3 "        PURGE        "')
+#lcd.widget_set(Main,w2,'1 2 "     ENVIRON CTR     "')
+#lcd.widget_set(Main,w3,'1 3 "        PURGE        "')
+line2_widget.set_text("     ENVIRON CTR     ")
+line3_widget.set_text("        PURGE        ")
 time.sleep(5)
+#KG
+#sys.exit()
 
 lcd_clear("main") #Clear the LCD display
 # Empty the string vars
@@ -358,6 +403,8 @@ w1str = ''
 w2str = ''
 w3str = ''
 w4str = ''
+
+
 
 #Start the GPS session last. This way we can spit out errors to the LCD screen first
 #session = gps(mode=WATCH_ENABLE)
@@ -490,7 +537,7 @@ while 1:
 		appendcsv(session.fix.latitude,session.fix.longitude,session.fix.altitude,session.fix.speed,datestr,timestr)
 
 	if mphspeed < switchspeed:
-        #FIXME
+                #FIXME
 		lcd_make_screen_active(Main,Screen2)
         	w1str = timestr + ' ' + datestr
         	w2str = str(len(session.satellites)) + " sats. Locked"
@@ -505,7 +552,7 @@ while 1:
 	elif mphspeed > switchspeed:
 		mphspeed = str(mphspeed)
 		#FIXME
-        lcd_make_screen_active(Screen2,Main)
+                lcd_make_screen_active(Screen2,Main)
         	lcd.widget_set(Screen2,w1,'1 "' + mphspeed[0] + '"')
 		lcd.widget_set(Screen2,w2,'6 "' + mphspeed[1] + '"')
         	#lcd.widget_set(Screen2,w2,'11 "' + mphspeed[2] + '"')
@@ -525,10 +572,14 @@ while 1:
     logging.debug(w4str)
 
     #FIXME
-    lcd.widget_set(Main,w1,'1 1 "' + w1str + '"')
-    lcd.widget_set(Main,w2,'1 2 "' + w2str + '"')
-    lcd.widget_set(Main,w3,'1 3 "' + w3str + '"')
-    lcd.widget_set(Main,w4,'1 4 "' + w4str + '"')
+    #lcd.widget_set(Main,w1,'1 1 "' + w1str + '"')
+    #lcd.widget_set(Main,w2,'1 2 "' + w2str + '"')
+    #lcd.widget_set(Main,w3,'1 3 "' + w3str + '"')
+    #lcd.widget_set(Main,w4,'1 4 "' + w4str + '"')
+    line1_widget.set_text(w1str)
+    line2_widget.set_text(w2str)
+    line3_widget.set_text(w3str)
+    line4_widget.set_text(w4str)
 
     # kbfunc()
     
