@@ -126,8 +126,14 @@ def checkignition():
 	#else:
 	#	ignition = 1
 
-        gpio7 = open("/sys/class/gpio/gpio7/value", 'r' )
-	ignition = not [int(gpio7.readline())]
+        
+        if socket.gethostname() == "builder":
+            gpio7 = open("/tmp/gpio7_fake", 'w+')
+            gpio7.write("0")
+            gpio7 = open("/tmp/gpio7_fake", 'r+')
+        else:
+            gpio7 = open("/sys/class/gpio/gpio7/value", 'r' )
+        ignition = not [int(gpio7.readline())]
 	gpio7.close()
         ignition = 1
 	return ignition
