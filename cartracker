@@ -286,27 +286,31 @@ def lcd_make_screen_active(active,background):
 
 
 def dumpdata():
-	logging.debug("Debug is " + str(debug))
-	logging.debug("Ignition is " + str(ignition))
-	logging.debug("GPS reading")
-	logging.debug("----------------------------------------")
-	logging.debug("Fix mode    " + str(session.fix.mode))
-	logging.debug("GPS ID      " + str(session.gps_id))
-	logging.debug("lat/long    " + str(session.fix.latitude) + "," + str(session.fix.longitude))
-	logging.debug("rounded     " + str(round(session.fix.latitude,4)) + "," + str(round(session.fix.longitude,4)))
-	logging.debug("time utc    " + str(session.utc) + "," + str(session.fix.time))
-	logging.debug("altitude    " + str(session.fix.altitude))
-	logging.debug("Precision, H" + str(session.fix.epx))
-	logging.debug("Precision, V" + str(session.fix.epv))
-	logging.debug("Precision   " + str(session.fix.ept))
-	logging.debug("speed(m/s)  " + str(session.fix.speed))
-	logging.debug("speed(mph)  " + str(session.fix.speed * 2.237))
-	logging.debug("climb       " + str(session.fix.climb))
-	logging.debug("Satellites  " + str(len(session.satellites)))
-	## logging.debug(str(session.data()))
-	# Display summary of all satellite data. Makes the display jump about a bit though
-	# for i in session.satellites:
-	#	logging.debug('\t', i)
+    """
+    Dumps all mostly relevant data to the logs
+    """
+    
+  	logging.debug("Debug is " + str(debug))
+  	logging.debug("Ignition is " + str(ignition))
+  	logging.debug("GPS reading")
+  	logging.debug("----------------------------------------")
+  	logging.debug("Fix mode    " + str(session.fix.mode))
+  	logging.debug("GPS ID      " + str(session.gps_id))
+  	logging.debug("lat/long    " + str(session.fix.latitude) + "," + str(session.fix.longitude))
+  	logging.debug("rounded     " + str(round(session.fix.latitude,4)) + "," + str(round(session.fix.longitude,4)))
+  	logging.debug("time utc    " + str(session.utc) + "," + str(session.fix.time))
+  	logging.debug("altitude    " + str(session.fix.altitude))
+  	logging.debug("Precision, H" + str(session.fix.epx))
+  	logging.debug("Precision, V" + str(session.fix.epv))
+  	logging.debug("Precision   " + str(session.fix.ept))
+  	logging.debug("speed(m/s)  " + str(session.fix.speed))
+  	logging.debug("speed(mph)  " + str(session.fix.speed * 2.237))
+  	logging.debug("climb       " + str(session.fix.climb))
+  	logging.debug("Satellites  " + str(len(session.satellites)))
+  	## logging.debug(str(session.data()))
+  	# Display summary of all satellite data. Makes the display jump about a bit though
+  	# for i in session.satellites:
+  	#	logging.debug('\t', i)
 
 
 def appendcsv(latitude, longitude, altitude, speed, date, time):
