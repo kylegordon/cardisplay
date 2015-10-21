@@ -478,6 +478,7 @@ line2_widget.set_text("     ENVIRON CTR     ")
 line3_widget.set_text("        PURGE        ")
 time.sleep(5)
 # KG
+# FIXME
 # sys.exit()
 
 # Clear the LCD display
@@ -519,6 +520,10 @@ while 1:
     # a = altitude, d = date/time, m=mode,
     # o=postion/fix, s=status, y=satellites
     # see man -s gpsd
+    
+    # FIXME
+    # Should I be using session.waiting() here? Check /usr/lib/python2.7/dist-packages/gps/client.py
+
 
     # report = session.next()
     # info.debug(report)
