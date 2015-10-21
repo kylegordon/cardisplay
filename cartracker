@@ -62,7 +62,7 @@ if not fileexists(configfile):
     sys.exit()
 
 config = ConfigParser.RawConfigParser()
-config.read('configfile')
+config.read(configfile)
 debug = config.getboolean('global', 'debug')
 
 (gpshost, gpsport, gpsdevice) = ("localhost", "2947", None)
@@ -614,23 +614,23 @@ while 1:
 
 	if mphspeed < switchspeed:
         #FIXME
-		lcd_make_screen_active(Main,Screen2)
-    	w1str = timestr + ' ' + datestr
+	    lcd_make_screen_active(Main,Screen2)
+        w1str = timestr + ' ' + datestr
     	w2str = str(len(session.satellites)) + " sats. Locked"
-		w3str = strCoord
-		#w3str = str(round(session.fix.latitude,4)) + latsuffix + ', ' + str(round(session.fix.longitude,4)) + longsuffix
-		if mphspeed == 0:
-			if ignition == 0:
-            	w4str = "Ignition is off"
-        	elif ignition == 1:
+        w3str = strCoord
+	    #w3str = str(round(session.fix.latitude,4)) + latsuffix + ', ' + str(round(session.fix.longitude,4)) + longsuffix
+        if mphspeed == 0:
+            if ignition == 0:
+                w4str = "Ignition is off"
+            if ignition == 1:
             	w4str = "Ignition is on"
 		w4str = str(mphspeed) + 'mph'
 	elif mphspeed > switchspeed:
 		mphspeed = str(mphspeed)
 		#FIXME
         lcd_make_screen_active(Screen2,Main)
-    	lcd.widget_set(Screen2,w1,'1 "' + mphspeed[0] + '"')
-		lcd.widget_set(Screen2,w2,'6 "' + mphspeed[1] + '"')
+        lcd.widget_set(Screen2,w1,'1 "' + mphspeed[0] + '"')
+        lcd.widget_set(Screen2,w2,'6 "' + mphspeed[1] + '"')
     	# lcd.widget_set(Screen2,w2,'11 "' + mphspeed[2] + '"')
 
 #    if dateutil.parser.parse(session.utc) > date:
