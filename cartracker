@@ -178,10 +178,16 @@ def saveandexit(signum, frame):
 
 
 def dojourneylog():
-	# FIXME
-	# Figure out some stats like start time & location, end time & location, distance travelled, average speed, and maybe attach the GPX file.
-	# We could probably work this out by reading the start and end of gpx trace and doing magic
-	logging.info("Creating and emailing journey log")
+    """
+    # FIXME
+    Figure out some stats like start time & location, end time & location,
+    distance travelled, average speed, and maybe attach the GPX file.
+    We could probably work this out by reading the start and end of gpx trace
+    and doing magic
+    """
+
+	  logging.info("Creating and emailing journey log")
+
 
 def createfiles():
 	# Whip up the filename for the current file
