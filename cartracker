@@ -240,9 +240,14 @@ def kbfunc():
 			return True
 	return False
 
+
 def process_num(process):
-	# Get the PID of a process
-	return commands.getoutput('pidof %s' % process)
+    """
+    Get the PID of a process
+    """
+
+    return commands.getoutput('pidof %s' % process)
+
 
 def lcd_clear(screen):
 	# Blank out all the widgets on the requested screen
