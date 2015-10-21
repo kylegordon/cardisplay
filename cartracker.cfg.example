@@ -1,6 +1,8 @@
 [global]
 debug = 1
 logfile = /var/log/cartracker.log
+
+# The speed at which to split from a detailed screen to a simple screen
 switchspeed = 10
 
 [twitter]
