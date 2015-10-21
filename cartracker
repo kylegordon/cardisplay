@@ -190,25 +190,31 @@ def dojourneylog():
 
 
 def createfiles():
-	# Whip up the filename for the current file
-	# We are assuming system time and date is correct. See NTP section of http://gpsd.berlios.de/gpsd.html to ensure moderate accuracy
-	current = datetime.now()
-	basename = current.strftime("%Y%m%d%H%M%S") + '-current'
-	csvoutputfile = outputdir + basename + '.csv' # Create a CSV file
-	gpxoutputfile = outputdir + basename + '.gpx' # Create a GPX file
+    """
+    Create GPX and CSV filenames for the current log files.
+    We are assuming the system time and date is correct.
+    See NTP section of http://gpsd.berlios.de/gpsd.html
+    to ensure moderate accuracy
+    """
 
-	# Create and open files in append mode
-	if not os.path.isfile(csvoutputfile):
-		csvfile = open(csvoutputfile, 'a')
-		temp = csvfile.name
-		logging.info("Created : " + csvfile.name)
+    current = datetime.now()
+    basename = current.strftime("%Y%m%d%H%M%S") + '-current'
+    csvoutputfile = outputdir + basename + '.csv'
+    gpxoutputfile = outputdir + basename + '.gpx'
 
-	if not os.path.isfile(gpxoutputfile):
-		gpxfile = open(gpxoutputfile, 'a')
-		logging.info("Created : " + gpxfile.name)
+    # Create and open files in append mode
+  	if not os.path.isfile(csvoutputfile):
+	  	  csvfile = open(csvoutputfile, 'a')
+		    temp = csvfile.name
+        logging.info("Created : " + csvfile.name)
 
-	# Return the 3 filesnames back to the caller.
-	return csvfile, gpxfile, basename
+	  if not os.path.isfile(gpxoutputfile):
+		    gpxfile = open(gpxoutputfile, 'a')
+		    logging.info("Created : " + gpxfile.name)
+
+    # Return the 3 filesnames back to the caller.
+    return csvfile, gpxfile, basename
+
 
 def closeandrename(file):
 	# Rename the chosen file from and to
