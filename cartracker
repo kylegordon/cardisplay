@@ -274,11 +274,16 @@ def lcd_clear(screen):
 
 
 def lcd_make_screen_active(active,background):
-	# Set the requested screen to active (info) and push the other to the background
-	# It's pretty primitive, and doesn't account for more than one background screen
+    """
+    Set the requested screen to active (info) and push the other to the
+    background. It's pretty primitive, and doesn't account for more than
+    one background screen
+    """
+
     # FIXME
-        lcd.screen_set(active,"-priority info")
-        lcd.screen_set(background,"-priority background")
+    lcd.screen_set(active,"-priority info")
+    lcd.screen_set(background,"-priority background")
+
 
 def dumpdata():
 	logging.debug("Debug is " + str(debug))
