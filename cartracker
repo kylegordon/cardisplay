@@ -41,12 +41,26 @@ from datetime import datetime, timedelta
 # Needed for Tweet function
 from os import popen
 
+def fileexists(filename):
+  """
+  Return True if a file exists, False otherwise.
+  """
+  try: os.stat(filename)
+  except OSError, e: return False
+  return True
+
 import ConfigParser
 
+configfile = '/etc/cartracker/cartracker.cfg'
+
 # Read the config file
-#FIXME Check for file existence first
+if not fileexists(configfile):
+  logging.info('Config file does not exist at %s. Exiting' % configfile)
+  print "Config file does not exist at %s. Exiting" % configfile
+  sys.exit()
+
 config = ConfigParser.RawConfigParser()
-config.read('/etc/cartracker/cartracker.cfg')
+config.read('configfile')
 debug = config.getboolean('global', 'debug')
 
 LOGFILE = config.get('global', 'logfile')
