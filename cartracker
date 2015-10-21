@@ -583,9 +583,9 @@ while 1:
     if mphspeed > 1 and stopstate == 1:
     	stopstate == 0
 	logging.info("Vehicle has started moving")
-	if tweeted == 0:
-		tweeted = 1
-		tweet("Moving again, at " + strCoord, twitteruser, twitterpass)
+    if tweeted == 0:
+        tweeted = 1
+        tweet("Moving again, at " + strCoord, twitteruser, twitterpass)
 
 #    if dateutil.parser.parse(session.utc) > date:
 #       logging.debug("Turn the backlight up or down")
@@ -595,10 +595,10 @@ while 1:
     # Put low speed numbers on one screen, and big numbers on another.
     # Switch when appropriate...
     if session.fix.mode == 1:
-    #FIXME
-	lcd_make_screen_active(Main,Screen2)
-	w1str = timestr + ' ' + datestr
-	w2str = str(len(session.satellites)) + " sats. No lock"
+        #FIXME
+        lcd_make_screen_active(Main,Screen2)
+        w1str = timestr + ' ' + datestr
+        w2str = str(len(session.satellites)) + " sats. No lock"
 	# Lets just append during testing
 	# appendcsv(session.fix.latitude,session.fix.longitude,session.fix.altitude,session.fix.speed,datestr,timestr)
 
