@@ -217,13 +217,18 @@ def createfiles():
 
 
 def closeandrename(file):
-	# Rename the chosen file from and to
-	current = datetime.now()
-	# Take the first part, strip 'current' from it, and append current date and time, and then append extension from original
-	destfilename = os.path.splitext(file.name)[0].rstrip('current') + current.strftime("%Y%m%d%H%M%S") + os.path.splitext(file.name)[1]
-	os.rename(file.name,destfilename)
-	logging.info("Data saved in " + destfilename)
-	file.close()
+    """
+    Rename the supplied files to something date based for archival
+    Takes the first part, strips 'current' from it,
+    append currents date and time, and then appends the extension
+    from the original
+    """
+
+    current = datetime.now()
+	  destfilename = os.path.splitext(file.name)[0].rstrip('current') + current.strftime("%Y%m%d%H%M%S") + os.path.splitext(file.name)[1]
+    os.rename(file.name,destfilename)
+    logging.info("Data saved in " + destfilename)
+    file.close()
 
 def kbfunc():
 	i,o,e = select.select([sys.stdin],[],[],0.0001)
