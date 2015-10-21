@@ -230,15 +230,16 @@ def closeandrename(file):
     logging.info("Data saved in " + destfilename)
     file.close()
 
+
 def kbfunc():
-	i,o,e = select.select([sys.stdin],[],[],0.0001)
-	for s in i:
-		if s == sys.stdin:
-			input = sys.stdin.readline()
-			logging.info("Keyboard input is" + input)
-			saveandexit()
-			return True
-	return False
+    i,o,e = select.select([sys.stdin],[],[],0.0001)
+    for s in i:
+		  if s == sys.stdin:
+			  input = sys.stdin.readline()
+  			logging.info("Keyboard input is" + input)
+	  		saveandexit()
+		  	return True
+  	return False
 
 
 def process_num(process):
