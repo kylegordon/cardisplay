@@ -116,17 +116,23 @@ model = [
 """]
 
 def tweet( message, user, password ):
-	logging.info('%s tweeting - %s' % (user, message))
-	time.sleep(1)
+    """
+    Sends a tweet with current activity
+    Probably no longer required. Kept for posterity.
+    """
 
-	url = 'http://twitter.com/statuses/update.xml'
+    logging.info('%s tweeting - %s' % (user, message))
+    time.sleep(1)
 
-	# If connected to the net, updated Twitter
-	curl = 'curl -s -u %s:%s -d status="%s" %s' % (user,password,message,url)
-	if connected: pipe = popen(curl, 'r')
+    url = 'http://twitter.com/statuses/update.xml'
 
-	# If not connected, note it
-	if not connected: logging.info("Not connected. Not tweeting")
+  	# If connected to the net, updated Twitter
+	  curl = 'curl -s -u %s:%s -d status="%s" %s' % (user,password,message,url)
+    if connected: pipe = popen(curl, 'r')
+
+    # If not connected, note it
+    if not connected: logging.info("Not connected. Not tweeting")
+
 
 def checkignition():
     """
