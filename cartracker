@@ -74,6 +74,7 @@ latsuffix = "?"
 longsuffix = "?"
 date = ''
 switchspeed = config.get('global', 'switchspeed')
+fakingit = config.getboolean('global', 'fake')
 outputdir = '/tmp/'
 stationary = 0
 twitteruser = config.get('twitter', 'user')
@@ -156,7 +157,8 @@ def checkignition():
     # else:
     # 	ignition = 1
 
-    if socket.gethostname() == "builder":
+    if fakingit == 1:
+        logging.debug("Faking GPIO usage")
         gpio7 = open("/tmp/gpio7_fake", 'w+')
         gpio7.write("0")
         gpio7 = open("/tmp/gpio7_fake", 'r+')
@@ -421,13 +423,17 @@ else:
     logging.critical("No GPSD running. Exiting in 20 seconds")
 
 # Test for data acquisition module
-if daq.ping():
-    w3str = "DACQ is present"
-    daq = 1
+if not fakingit:
+    if daq.ping():
+        w3str = "DACQ is present"
+        daq = 1
+    else:
+        w3str = "DACQ not present"
+        daq = 0
+        countdowndelay = 0.5
 else:
-    w3str = "DACQ not present"
-    daq = 0
-    countdowndelay = 0.5
+    # We're going to pretend that we have a data acquisition module
+    daq = 1
 
 # Display the loading info
 # FIXME
