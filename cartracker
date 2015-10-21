@@ -289,7 +289,7 @@ def dumpdata():
     """
     Dumps all mostly relevant data to the logs
     """
-    
+
   	logging.debug("Debug is " + str(debug))
   	logging.debug("Ignition is " + str(ignition))
   	logging.debug("GPS reading")
@@ -314,10 +314,14 @@ def dumpdata():
 
 
 def appendcsv(latitude, longitude, altitude, speed, date, time):
-	# appendcsv stub. Might become append GPX one day
-	logging.info("Append the CSV file...")
-	writer=csv.writer(csvfile)
-	writer.writerow( (latitude, longitude, altitude, speed, date, time) )
+	  """
+    Writes a CSV row with current location details
+    """
+
+  	logging.info("Append the CSV file...")
+  	writer=csv.writer(csvfile)
+	  writer.writerow( (latitude, longitude, altitude, speed, date, time) )
+
 
 #Create the 3 files
 csvfile,gpxfile,basename = createfiles()
