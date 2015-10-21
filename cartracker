@@ -104,9 +104,9 @@ model = [
 def tweet( message, user, password ):
 	logging.info('%s tweeting - %s' % (user, message))
 	time.sleep(1)
- 
-	url = 'http://twitter.com/statuses/update.xml' 
-	
+
+	url = 'http://twitter.com/statuses/update.xml'
+
 	# If connected to the net, updated Twitter
 	curl = 'curl -s -u %s:%s -d status="%s" %s' % (user,password,message,url)
 	if connected: pipe = popen(curl, 'r')
@@ -117,7 +117,7 @@ def tweet( message, user, password ):
 def checkignition():
 	# Check the current state of the ignition.
 	# If ignition is off. Drop a shutdown -t +5, save and bail
-	
+
 	# Call daq.whatever() and check the state of the ignition line, make it boolean, whatever
 	# FIXME
 	# Should we really just poll all channels at once?
@@ -126,7 +126,7 @@ def checkignition():
 	#else:
 	#	ignition = 1
 
-        
+
         if socket.gethostname() == "builder":
             gpio7 = open("/tmp/gpio7_fake", 'w+')
             gpio7.write("0")
@@ -150,7 +150,7 @@ def saveandexit(signum, frame):
         # The save is blocking
         closeandrename(csvfile)
         closeandrename(gpxfile)
-	
+
 	dojourneylog()
 
 	os.system('sync')
@@ -392,7 +392,7 @@ if not gpsdpid or not daq:
 else:
 	# Give a short status display before proceeding
 	time.sleep(5)
-	
+
 ## Comedy status update
 #FIXME
 #lcd.widget_set(Main,w2,'1 2 "     ENVIRON CTR     "')
@@ -452,10 +452,10 @@ while 1:
     #if session.valid & PACKET_SET:
 	#if debug: dumpdata()
     dumpdata()
-   
+
     # Since using the logging module, some other method will be required to dump GPS info to console...
     # if debug: dumpdata()
-    
+
     # GPS speed is in meters per second. We need to make it usable
     mphspeed = session.fix.speed * 2.237
 
@@ -483,7 +483,7 @@ while 1:
     else:
 	logging.debug("No state change...")
     old_status = session.fix.mode
-   
+
     # This chunk is no longer required, since the JeeNode decides when to turn off, and this script should catch SIGTERM and exit
 #    if ignition == 0:
 #    	ignitionofftime = datetime.now()
@@ -494,7 +494,7 @@ while 1:
 #		saveandexit()
 #    elif ignition == 1:
 #    	ignitiontimedelta = 0
-    
+
     if mphspeed < 1:
     	if stopstate == 0:
 		# Start timer for 2 minutes and then make stationary=1
@@ -505,7 +505,7 @@ while 1:
 	elif stopstate == 1:
 		stoptimedelta = datetime.now() - stoptime # Figure out how long we've been stopped for
 		logging.info("Stopped for - " + str(stoptimedelta))
-		if stoptimedelta >= timedelta(minutes=2): 
+		if stoptimedelta >= timedelta(minutes=2):
 			logging.info("Vehicle has stopped for over 2 minutes")
 			if tweeted == 0:
 				tweeted = 1
@@ -552,7 +552,7 @@ while 1:
 		if mphspeed == 0:
 			if ignition == 0:
                         	w4str = "Ignition is off"
-                	elif ignition == 1:     
+                	elif ignition == 1:
                         	w4str = "Ignition is on"
 		w4str = str(mphspeed) + 'mph'
 	elif mphspeed > switchspeed:
@@ -588,7 +588,7 @@ while 1:
     line4_widget.set_text(w4str)
 
     # kbfunc()
-    
+
     # FIXME
     # Should we remove this sleep at the end of the main loop and use timedeltas in other places (such as datalogging)?
 
