@@ -129,9 +129,10 @@ def tweet( message, user, password ):
 	if not connected: logging.info("Not connected. Not tweeting")
 
 def checkignition():
-	# Check the current state of the ignition.
-	# If ignition is off. Drop a shutdown -t +5, save and bail
-
+  """
+  Check the current state of the ignition.
+  If ignition is off. Drop a shutdown -t +5, save and exit
+  """
 	# Call daq.whatever() and check the state of the ignition line, make it boolean, whatever
 	# FIXME
 	# Should we really just poll all channels at once?
@@ -152,27 +153,29 @@ def checkignition():
         ignition = 1
 	return ignition
 
-def saveandexit(signum, frame):
 
-        logging.info("Signal handler called with signal " + str(signum))
+def saveandexit(signum, frame):
+    """
+    Save all log files and exit cleanly
+    """
+
+    logging.info("Signal handler called with signal " + str(signum))
 
     # FIXME
-	lcd_clear("main")
-	lcd.widget_set(Main,w2,'1 2 "    SHUTTING DOWN    "')
-	lcd.widget_set(Main,w3,'1 3 "         ...         "')
+    lcd_clear("main")
+    lcd.widget_set(Main, w2, '1 2 "    SHUTTING DOWN    "')
+    lcd.widget_set(Main, w3, '1 3 "         ...         "')
 
-        # The save is blocking
-        closeandrename(csvfile)
-        closeandrename(gpxfile)
+    # The save is blocking
+    closeandrename(csvfile)
+    closeandrename(gpxfile)
 
-	dojourneylog()
+    dojourneylog()
+    os.system('sync')
+    lcd.widget_set(Main, w3, '1 4 "        READY        "')
+    logging.info("Exiting")
+    sys.exit(0)
 
-	os.system('sync')
-
-        lcd.widget_set(Main,w3,'1 4 "        READY        "')
-
-        logging.info("Exiting")
-        sys.exit(0)
 
 def dojourneylog():
 	# FIXME
