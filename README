@@ -16,6 +16,15 @@ GPIO
 modprobe rdc321x_gpio
 Enter the above modules in /etc/modules
 
+
+GPIO7 is used for signalling from the power management to the SBC that power may stop
+GPIO8 is used for signalling to the power management that the SBC is up and running
+
+echo in > /sys/class/gpio/gpio7/direction
+echo out > /sys/class/gpio/gpio8/direction
+
+echo 1 > /sys/class/gpio/gpio8/value 
+
 REQUIREMENTS
 ------------
 pylcd
