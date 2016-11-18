@@ -16,9 +16,18 @@ GPIO
 modprobe rdc321x_gpio
 Enter the above modules in /etc/modules
 
+
+GPIO7 is used for signalling from the power management to the SBC that power may stop
+GPIO8 is used for signalling to the power management that the SBC is up and running
+
+echo in > /sys/class/gpio/gpio7/direction
+echo out > /sys/class/gpio/gpio8/direction
+
+echo 1 > /sys/class/gpio/gpio8/value 
+
 REQUIREMENTS
 ------------
-pylcd
+#pylcd
 python-gps
 python-dateutil
 python-ftdi
@@ -33,6 +42,18 @@ tar xvf pylcd-0.2.tar.gz
 svn co svn+ssh://bagpuss@lodge.glasgownet.com/home/bagpuss/svn/home/scripts/pylcd-0.2
 cd pylcd-0.2
 python setup.py install 
+
+INSTALLING LCDPROC
+------------------
+sudo apt-get install python-pip
+sudo pip install lcdproc
+
+CONFIGURE LCDPROC
+-----------------
+Ensure the following is in the [Server] section
+ServerScreen=no
+AutoRotate=no
+
 
 INSTALLING CARTRACKER
 ---------------------
