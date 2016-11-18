@@ -1,0 +1,5 @@
+Odroid U3 with UPS battery pack
+
+UPS connected to IO port as per instructions, and signalling AC_OK over GPIO 199 & 200 
+powermanager.sh called from /etc/rc.local
+
