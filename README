@@ -27,7 +27,7 @@ echo 1 > /sys/class/gpio/gpio8/value
 
 REQUIREMENTS
 ------------
-pylcd
+#pylcd
 python-gps
 python-dateutil
 python-ftdi
@@ -45,6 +45,7 @@ python setup.py install
 
 INSTALLING LCDPROC
 ------------------
+sudo apt-get install python-pip
 sudo pip install lcdproc
 
 CONFIGURE LCDPROC
