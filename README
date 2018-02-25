@@ -28,6 +28,7 @@ echo 1 > /sys/class/gpio/gpio8/value
 REQUIREMENTS
 ------------
 pylcd
+python-pip
 python-gps
 python-dateutil
 python-ftdi
