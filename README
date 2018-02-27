@@ -13,21 +13,14 @@ DHCP on eth0
 
 REQUIREMENTS
 ------------
-#pylcd
+pylcd
+python-pip
 python-gps
 python-dateutil
 python-ftdi
 curl
 python-bluez
 python-serial
-
-INSTALLING PyLCD
-----------------
-tar xvf pylcd-0.2.tar.gz
-* OR *
-svn co svn+ssh://bagpuss@lodge.glasgownet.com/home/bagpuss/svn/home/scripts/pylcd-0.2
-cd pylcd-0.2
-python setup.py install
 
 INSTALLING LCDPROC
 ------------------
@@ -40,16 +33,12 @@ Ensure the following is in the [Server] section
 ServerScreen=no
 AutoRotate=no
 
-
 INSTALLING CARTRACKER
 ---------------------
 Copy it into somewhere sensible. ie /usr/local/cartracker/
 Owned as the user that will be providing the schedule SVN pulls
 Take the cartracker.cfg.example file and edit to suit, then save as cartracker.cfg
-
-INIT SCRIPT
------------
-Fired from rc.local. Cos I can't be arsed with SysV. Script will trigger its own shutdown when appropriate
+Copy cardisplay.service to /etc/systemd/system/, run systemctl daemon-reload and then systemctl start cardisplay.service
 
 GPSD
 ----

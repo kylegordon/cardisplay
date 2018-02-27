@@ -1,0 +1,15 @@
+# This systemd service definition goes in /etc/systemd/system/
+# Execute systemctl daemon-reload
+# Then systemctl start cardisplay.service
+
+[Unit]
+Description=CarDisplay Service
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/home/pi/cardisplay/cardisplay
+
+[Install]
+WantedBy=multi-user.target
+

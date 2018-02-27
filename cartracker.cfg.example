@@ -1,6 +1,7 @@
 [global]
 debug = 1
-logfile = /var/log/cartracker.log
+logfile = /tmp/cartracker.log
+fake = false
 
 # The speed at which to split from a detailed screen to a simple screen
 switchspeed = 10

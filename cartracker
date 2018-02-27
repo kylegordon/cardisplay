@@ -291,8 +291,8 @@ def lcd_make_screen_active(active, background):
     """
 
     # FIXME
-    lcd.screen_set(active, "-priority info")
-    lcd.screen_set(background, "-priority background")
+    #lcd.screen_set(active, "-priority info")
+    #lcd.screen_set(background, "-priority background")
 
 
 def dumpdata():
@@ -380,6 +380,7 @@ w4str = 'Empty line 4'
 screen1 = lcd.add_screen("Screen1")
 screen1.set_heartbeat("off")
 screen1.set_priority("info")
+screen1.set_backlight("on")
 logging.debug("Giving Main priority info")
 line1_widget = screen1.add_string_widget("line1_string", text="Line1", x=1, y=1)
 line2_widget = screen1.add_string_widget("line2_string", text="Line2", x=1, y=2)
@@ -509,11 +510,13 @@ while 1:
     signal.signal(signal.SIGTERM, saveandexit)
     signal.signal(signal.SIGINT, saveandexit)
 
+    # Handled by powermanager.sh now
+
     # Check the ignition state
     # Although it was set to 0 above, it should now be true as this system only starts when the engine is running
-    ignition = checkignition()
-    if ignition == 0:
-    	os.system('shutdown -h -t now')
+    #ignition = checkignition()
+    #if ignition == 0:
+    #	os.system('shutdown -h -t now')
 
     #Since using the logging module, this is no longer relevant
     # session.query('admosyi') ## This is apparently redundant now
@@ -527,10 +530,14 @@ while 1:
 
     # report = session.next()
     # info.debug(report)
-    if session.poll() == -1:
-	logging.critical("daemon error")
+    ##if session.poll() == -1:
+	##logging.critical("daemon error")
     #if session.valid & PACKET_SET:
 	#if debug: dumpdata()
+
+    session = gps()
+    session.stream(WATCH_ENABLE|WATCH_NEWSTYLE)
+
     dumpdata()
 
     # Since using the logging module, some other method will be required to dump GPS info to console...
@@ -607,7 +614,7 @@ while 1:
     # Switch when appropriate...
     if session.fix.mode == 1:
         #FIXME
-        lcd_make_screen_active(Main,Screen2)
+        #lcd_make_screen_active(Main,Screen2)
         w1str = timestr + ' ' + datestr
         w2str = str(len(session.satellites)) + " sats. No lock"
 	# Lets just append during testing
@@ -625,7 +632,8 @@ while 1:
 
 	if mphspeed < switchspeed:
         #FIXME
-	    lcd_make_screen_active(Main,Screen2)
+	    #lcd_make_screen_active(Main,Screen2)
+            pass
         w1str = timestr + ' ' + datestr
     	w2str = str(len(session.satellites)) + " sats. Locked"
         w3str = strCoord
@@ -639,7 +647,7 @@ while 1:
 	elif mphspeed > switchspeed:
 		mphspeed = str(mphspeed)
 		#FIXME
-        lcd_make_screen_active(Screen2,Main)
+        #lcd_make_screen_active(Screen2,Main)
         lcd.widget_set(Screen2,w1,'1 "' + mphspeed[0] + '"')
         lcd.widget_set(Screen2,w2,'6 "' + mphspeed[1] + '"')
     	# lcd.widget_set(Screen2,w2,'11 "' + mphspeed[2] + '"')
