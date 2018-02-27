@@ -37,10 +37,7 @@ INSTALLING CARTRACKER
 Copy it into somewhere sensible. ie /usr/local/cartracker/
 Owned as the user that will be providing the schedule SVN pulls
 Take the cartracker.cfg.example file and edit to suit, then save as cartracker.cfg
-
-INIT SCRIPT
------------
-Fired from rc.local. Cos I can't be arsed with SysV. Script will trigger its own shutdown when appropriate
+Copy cardisplay.service to /etc/systemd/system/, run systemctl daemon-reload and then systemctl start cardisplay.service
 
 GPSD
 ----
